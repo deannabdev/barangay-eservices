@@ -6,6 +6,31 @@ import java.awt.geom.*;
 import java.util.ArrayList;
 import java.util.List;
 
+interface Fee {
+    String getDescription();
+    boolean isFree();
+
+    default Badge createTag() {
+        Color background = isFree() ? Theme.GREEN_SOFT : Theme.RED_SOFT;
+        Color foreground = isFree() ? Theme.GREEN : Theme.RED;
+        return new Badge(getDescription(), background, foreground, 8);
+    }
+}
+
+class PaidFee implements Fee {
+    private final String description;
+
+    PaidFee(String description) { this.description = description; }
+
+    @Override public String getDescription() { return description; }
+    @Override public boolean isFree() { return false; }
+}
+
+class FreeFee implements Fee {
+    @Override public String getDescription() { return "Free"; }
+    @Override public boolean isFree() { return true; }
+}
+
 class EServicesScreen extends ScrollableScreen {
     @Override protected String getHeaderTitle()    { return "Barangay E-Services"; }
     @Override protected boolean hasHeader()        { return false; }
