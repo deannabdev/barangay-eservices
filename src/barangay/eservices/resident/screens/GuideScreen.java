@@ -20,32 +20,32 @@ import java.util.List;
 
 class GuideScreen extends ScrollableScreen {
     @Override protected String getHeaderTitle()    { return "Citizen Guide"; }
+    @Override protected boolean hasHeader()        { return false; }
+    @Override protected JComponent getFixedHeader() {
+        return new HomeComponents.HeaderBar("Citizen Guide", "Central Signal, Taguig");
+    }
     @Override protected AppSection createContent() { return new GuideContent(GuideData.getOfficials()); }
 }
 
-class GuideContent extends AppSection {
+class GuideContent extends AppSection implements Scrollable {
     private final List<Official> officials;
 
     GuideContent(List<Official> officials) { this.officials = officials; }
 
     @Override
     protected void buildUI() {
-        setLayout(new BorderLayout());
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(Theme.BG);
-
-        JPanel content = new JPanel();
-        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-        content.setBackground(Theme.BG);
-        content.setBorder(new EmptyBorder(14, 16, 16, 16));
+        setBorder(new EmptyBorder(16, 16, 32, 16));
 
         // --- history ---
-        content.add(sectionTitle("Barangay History"));
-        content.add(Box.createVerticalStrut(10));
+        addFullWidth(sectionTitle("Barangay History"));
+        add(Box.createVerticalStrut(10));
 
         RoundedPanel history = new RoundedPanel(Color.WHITE, Theme.BORDER, 12);
         history.setLayout(new BoxLayout(history, BoxLayout.Y_AXIS));
         history.setBorder(new EmptyBorder(12, 12, 12, 12));
-        JLabel text = new JLabel("<html><body width='315'>Established in the highly active city of Taguig, "
+        JLabel text = new JLabel("<html><body width='265'>Established in the highly active city of Taguig, "
                 + "Barangay Central Signal has consistently grown from a humble neighborhood into a bustling, dynamic "
                 + "center of community life and commerce in the metropolis.</body></html>");
         text.setFont(Theme.regular(11));
@@ -64,25 +64,31 @@ class GuideContent extends AppSection {
         history.add(Box.createVerticalStrut(10));
         history.add(link);
         for (Component c : history.getComponents()) ((JComponent) c).setAlignmentX(LEFT_ALIGNMENT);
-        content.add(history);
+        addFullWidth(history);
 
         // --- map ---
-        content.add(Box.createVerticalStrut(18));
-        content.add(sectionTitle("Barangay Boundaries Map"));
-        content.add(Box.createVerticalStrut(10));
-        content.add(new MapPanel());
+        add(Box.createVerticalStrut(18));
+        addFullWidth(sectionTitle("Barangay Boundaries Map"));
+        add(Box.createVerticalStrut(10));
+        addFullWidth(new MapPanel());
 
         // --- officials ---
-        content.add(Box.createVerticalStrut(18));
-        content.add(sectionTitle("Barangay Officials (2025-2028)"));
-        content.add(Box.createVerticalStrut(10));
+        add(Box.createVerticalStrut(18));
+        addFullWidth(sectionTitle("Barangay Officials (2025-2028)"));
+        add(Box.createVerticalStrut(10));
         for (Official o : officials) {
-            content.add(new OfficialCard(o));
-            content.add(Box.createVerticalStrut(8));
+            addFullWidth(new OfficialCard(o));
+            add(Box.createVerticalStrut(8));
         }
+        add(Box.createVerticalStrut(16));
+    }
 
-        for (Component c : content.getComponents()) ((JComponent) c).setAlignmentX(LEFT_ALIGNMENT);
-        add(content, BorderLayout.NORTH);
+    private void addFullWidth(JComponent component) {
+        component.setAlignmentX(LEFT_ALIGNMENT);
+        Dimension preferred = component.getPreferredSize();
+        component.setMinimumSize(new Dimension(0, preferred.height));
+        component.setMaximumSize(new Dimension(Integer.MAX_VALUE, preferred.height));
+        add(component);
     }
 
     private JLabel sectionTitle(String text) {
@@ -91,6 +97,14 @@ class GuideContent extends AppSection {
         l.setForeground(Theme.TEXT);
         return l;
     }
+
+    @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }
+    @Override public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) { return 16; }
+    @Override public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+        return visibleRect.height;
+    }
+    @Override public boolean getScrollableTracksViewportWidth() { return true; }
+    @Override public boolean getScrollableTracksViewportHeight() { return false; }
 }
 
 class OfficialCard extends RoundedPanel {
@@ -166,7 +180,7 @@ class MapPanel extends JPanel {
     private double lat, lon;
 
     MapPanel() {
-        this(false, 12, TaguigMap.CITY_LAT, TaguigMap.CITY_LON, new Dimension(358, 140),
+        this(false, 12, TaguigMap.CITY_LAT, TaguigMap.CITY_LON, new Dimension(0, 140),
                 TaguigMap.BRGY_LAT, TaguigMap.BRGY_LON, "Brgy. Central Signal");
     }
 
