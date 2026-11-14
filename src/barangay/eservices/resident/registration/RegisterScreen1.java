@@ -58,9 +58,10 @@ public class RegisterScreen1 extends JFrame {
         int fieldX = (W - 267) / 2;
 
         // Title + subtitle
-        ShadowLabel title = new ShadowLabel("Resident Registration", RegistrationTheme.RED);
+        JLabel title = new JLabel("Resident Registration");
         title.setFont(RegistrationTheme.font(Font.BOLD, 22f));
-        title.setBounds(fieldX - 8, 88, 267, 44);
+        title.setForeground(RegistrationTheme.RED);
+        title.setBounds(fieldX, 88, 267, 32);
         root.add(title);
 
         JLabel subtitle = new JLabel("Create your account to access barangay e-services");
