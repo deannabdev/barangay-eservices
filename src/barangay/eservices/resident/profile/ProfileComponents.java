@@ -473,16 +473,22 @@ class ProfileRequestCard extends JComponent {
 /** Bottom navigation bar: Home, E-Services, Reports, Guide, Profile. */
 class ProfileNavBar extends JComponent {
     private static final String[] LABELS = {"Home", "E-Services", "Reports", "Guide", "Profile"};
-    private final int active;
+    private int active;
 
     ProfileNavBar(int active, IntConsumer onSelect) {
         this.active = active;
+        setPreferredSize(new Dimension(351, 86));
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) {
                 onSelect.accept(Math.min(4, e.getX() * 5 / getWidth()));
             }
         });
+    }
+
+    void setActive(int active) {
+        this.active = active;
+        repaint();
     }
 
     @Override protected void paintComponent(Graphics g0) {
