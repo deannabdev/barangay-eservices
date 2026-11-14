@@ -8,23 +8,23 @@ import java.util.List;
 
 class EServicesScreen extends ScrollableScreen {
     @Override protected String getHeaderTitle()    { return "Barangay E-Services"; }
+    @Override protected boolean hasHeader()        { return false; }
+    @Override protected JComponent getFixedHeader() {
+        return new HomeComponents.HeaderBar("Barangay E-Services", "Central Signal, Taguig");
+    }
     @Override protected AppSection createContent() { return new DocumentList(EServicesData.getDocuments()); }
 }
 
-class DocumentList extends AppSection {
+class DocumentList extends AppSection implements Scrollable {
     private final List<DocumentRequest> requests;
 
     DocumentList(List<DocumentRequest> requests) { this.requests = requests; }
 
     @Override
     protected void buildUI() {
-        setLayout(new BorderLayout());
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(Theme.BG);
-
-        JPanel content = new JPanel();
-        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-        content.setBackground(Theme.BG);
-        content.setBorder(new EmptyBorder(16, 16, 16, 16));
+        setBorder(new EmptyBorder(16, 16, 32, 16));
 
         JLabel heading = new JLabel("Official Document Requests");
         heading.setFont(Theme.bold(19));
@@ -35,30 +35,43 @@ class DocumentList extends AppSection {
         desc.setFont(Theme.regular(12));
         desc.setForeground(Theme.TEXT_SUB);
 
-        content.add(heading);
-        content.add(Box.createVerticalStrut(6));
-        content.add(desc);
-        content.add(Box.createVerticalStrut(14));
+        addFullWidth(heading);
+        add(Box.createVerticalStrut(6));
+        addFullWidth(desc);
+        add(Box.createVerticalStrut(14));
 
         for (DocumentRequest r : requests) {
-            content.add(new DocumentCard(r));
-            content.add(Box.createVerticalStrut(14));
+            addFullWidth(new DocumentCard(r));
+            add(Box.createVerticalStrut(14));
         }
 
         RoundedPanel note = new RoundedPanel(Color.WHITE, Theme.BORDER, 14);
-        note.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        note.setBorder(new EmptyBorder(12, 10, 12, 10));
+        note.setLayout(new BorderLayout(8, 0));
+        note.setBorder(new EmptyBorder(10, 12, 10, 12));
         note.add(new IconLabel(IconType.INFO, 14, Theme.MUTED));
-        JLabel nl = new JLabel("<html><body width='285'>For offline assistance, visit the Central Signal "
+        JLabel nl = new JLabel("<html><body width='255'>For offline assistance, visit the Central Signal "
                 + "Barangay Hall, Balleer St. from Mon-Fri, 8 AM \u2013 5 PM.</body></html>");
         nl.setFont(Theme.regular(10));
         nl.setForeground(Theme.TEXT_SUB);
         note.add(nl);
-        content.add(note);
-
-        for (Component c : content.getComponents()) ((JComponent) c).setAlignmentX(LEFT_ALIGNMENT);
-        add(content, BorderLayout.NORTH);
+        addFullWidth(note);
     }
+
+    private void addFullWidth(JComponent component) {
+        component.setAlignmentX(LEFT_ALIGNMENT);
+        Dimension preferred = component.getPreferredSize();
+        component.setMinimumSize(new Dimension(0, preferred.height));
+        component.setMaximumSize(new Dimension(Integer.MAX_VALUE, preferred.height));
+        add(component);
+    }
+
+    @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }
+    @Override public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) { return 16; }
+    @Override public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+        return visibleRect.height;
+    }
+    @Override public boolean getScrollableTracksViewportWidth() { return true; }
+    @Override public boolean getScrollableTracksViewportHeight() { return false; }
 }
 
 class DocumentCard extends RoundedPanel {
