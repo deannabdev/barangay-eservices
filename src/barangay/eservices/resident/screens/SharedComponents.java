@@ -766,6 +766,88 @@ enum IconType {
             g.drawLine(size / 2, size / 3, size / 2, size / 2);
             g.drawLine(size / 2, size / 2, size * 2 / 3, size * 3 / 5);
         }
+    },
+    NAV_HOME {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            g.setStroke(new BasicStroke(Math.max(1.5f, size / 12f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            Path2D house = new Path2D.Double();
+            house.moveTo(size / 6.0, size / 2.0);
+            house.lineTo(size / 2.0, size / 6.0);
+            house.lineTo(size * 5 / 6.0, size / 2.0);
+            house.moveTo(size / 4.0, size * 2 / 5.0);
+            house.lineTo(size / 4.0, size * 5 / 6.0);
+            house.lineTo(size * 3 / 4.0, size * 5 / 6.0);
+            house.lineTo(size * 3 / 4.0, size * 2 / 5.0);
+            house.moveTo(size * 9 / 20.0, size * 5 / 6.0);
+            house.lineTo(size * 9 / 20.0, size * 3 / 5.0);
+            house.lineTo(size * 11 / 20.0, size * 3 / 5.0);
+            house.lineTo(size * 11 / 20.0, size * 5 / 6.0);
+            g.draw(house);
+        }
+    },
+    NAV_DOCUMENT {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            g.setStroke(new BasicStroke(Math.max(1.5f, size / 12f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            Path2D page = new Path2D.Double();
+            page.moveTo(size / 4.0, size / 8.0);
+            page.lineTo(size * 3 / 5.0, size / 8.0);
+            page.lineTo(size * 3 / 4.0, size / 4.0);
+            page.lineTo(size * 3 / 4.0, size * 7 / 8.0);
+            page.lineTo(size / 4.0, size * 7 / 8.0);
+            page.closePath();
+            page.moveTo(size * 3 / 5.0, size / 8.0);
+            page.lineTo(size * 3 / 5.0, size / 4.0);
+            page.lineTo(size * 3 / 4.0, size / 4.0);
+            g.draw(page);
+            g.drawLine(size * 7 / 20, size * 9 / 20, size * 13 / 20, size * 9 / 20);
+            g.drawLine(size * 7 / 20, size * 3 / 5, size * 13 / 20, size * 3 / 5);
+            g.drawLine(size * 7 / 20, size * 3 / 4, size * 11 / 20, size * 3 / 4);
+        }
+    },
+    NAV_REPORT {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            g.setStroke(new BasicStroke(Math.max(1.5f, size / 12f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.drawPolygon(new int[]{size / 2, size / 10, size * 9 / 10},
+                    new int[]{size / 8, size * 7 / 8, size * 7 / 8}, 3);
+            g.drawLine(size / 2, size * 2 / 5, size / 2, size * 3 / 5);
+            g.fillOval(size / 2 - Math.max(1, size / 20), size * 2 / 3,
+                    Math.max(2, size / 10), Math.max(2, size / 10));
+        }
+    },
+    NAV_GUIDE {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            g.setStroke(new BasicStroke(Math.max(1.5f, size / 12f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            Path2D book = new Path2D.Double();
+            book.moveTo(size / 2.0, size / 4.0);
+            book.curveTo(size * 3 / 8.0, size / 8.0, size / 4.0, size / 8.0, size / 8.0, size / 5.0);
+            book.lineTo(size / 8.0, size * 4 / 5.0);
+            book.curveTo(size / 4.0, size * 3 / 4.0, size * 3 / 8.0, size * 3 / 4.0, size / 2.0, size * 7 / 8.0);
+            book.curveTo(size * 5 / 8.0, size * 3 / 4.0, size * 3 / 4.0, size * 3 / 4.0, size * 7 / 8.0, size * 4 / 5.0);
+            book.lineTo(size * 7 / 8.0, size / 5.0);
+            book.curveTo(size * 3 / 4.0, size / 8.0, size * 5 / 8.0, size / 8.0, size / 2.0, size / 4.0);
+            book.closePath();
+            book.moveTo(size / 2.0, size / 4.0);
+            book.lineTo(size / 2.0, size * 7 / 8.0);
+            g.draw(book);
+        }
+    },
+    NAV_PROFILE {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            g.setStroke(new BasicStroke(Math.max(1.5f, size / 12f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.drawOval(size / 8, size / 8, size * 3 / 4, size * 3 / 4);
+            g.drawOval(size * 7 / 16, size / 4, size / 8, size / 8);
+            g.drawArc(size / 3, size * 9 / 20, size / 3, size * 2 / 5, 0, 180);
+        }
     };
 
     public abstract void draw(Graphics2D g, int size, Color color);
@@ -909,13 +991,18 @@ class RoundedButton extends JButton {
 
 class IconLabel extends JComponent {
     private final IconType type;
-    private final Color color;
+    private Color color;
 
     IconLabel(IconType type, int size, Color color) {
         this.type = type;
         this.color = color;
         setPreferredSize(new Dimension(size, size));
         setMinimumSize(new Dimension(size, size));
+    }
+
+    void setColor(Color color) {
+        this.color = color;
+        repaint();
     }
 
     @Override
@@ -1039,7 +1126,7 @@ abstract class ScrollableScreen extends AppSection {
     }
 }
 
-class Navigator {
+class Navigator implements NavListener {
     private final CardLayout cards;
     private final JPanel center;
     private final List<NavListener> listeners = new ArrayList<>();
@@ -1061,6 +1148,8 @@ class Navigator {
 class BottomNav extends JPanel implements NavListener {
     private final Navigator nav;
     private final List<JButton> buttons = new ArrayList<>();
+    private final List<JLabel> labels = new ArrayList<>();
+    private final List<IconLabel> icons = new ArrayList<>();
 
     BottomNav(Navigator nav) {
         this.nav = nav;
@@ -1070,20 +1159,42 @@ class BottomNav extends JPanel implements NavListener {
     }
 
     public void init() {
-        String[][] items = {
-            {"Home", "🏠"}, {"E-Services", "📄"}, {"Reports", "📋"}, {"Guide", "📖"}, {"Profile", "👤"}
+        Object[][] items = {
+            {"Home", "Home", IconType.NAV_HOME},
+            {"E-Services", "E-Services", IconType.NAV_DOCUMENT},
+            {"Reports", "Reports", IconType.NAV_REPORT},
+            {"Guide", "Guide", IconType.NAV_GUIDE},
+            {"Profile", "Profile", IconType.NAV_PROFILE}
         };
-        for (String[] item : items) {
-            JButton b = new JButton(item[0]);
-            b.setFont(Theme.regular(9));
-            b.setForeground(Theme.MUTED);
+        for (Object[] item : items) {
+            String labelText = (String) item[0];
+            String screen = (String) item[1];
+            IconLabel icon = new IconLabel((IconType) item[2], 22, Theme.MUTED);
+            JLabel label = new JLabel(labelText, SwingConstants.CENTER);
+            label.setFont(Theme.regular(9));
+            label.setForeground(Theme.MUTED);
+
+            JButton b = new JButton();
+            b.setLayout(new BoxLayout(b, BoxLayout.Y_AXIS));
+            b.add(Box.createVerticalGlue());
+            icon.setAlignmentX(Component.CENTER_ALIGNMENT);
+            label.setAlignmentX(Component.CENTER_ALIGNMENT);
+            b.add(icon);
+            b.add(Box.createVerticalStrut(3));
+            b.add(label);
+            b.add(Box.createVerticalGlue());
+            b.setPreferredSize(new Dimension(64, 58));
+            b.setToolTipText(labelText);
+            b.getAccessibleContext().setAccessibleName(labelText);
             b.setFocusPainted(false);
             b.setBorderPainted(false);
             b.setContentAreaFilled(false);
             b.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-            b.putClientProperty("screen", item[1]); // store screen key
+            b.putClientProperty("screen", screen);
             b.addActionListener(e -> nav.onNavigate((String) b.getClientProperty("screen")));
             buttons.add(b);
+            labels.add(label);
+            icons.add(icon);
             add(b);
         }
         nav.attach(this);
@@ -1091,10 +1202,13 @@ class BottomNav extends JPanel implements NavListener {
 
     @Override
     public void onNavigate(String screen) {
-        for (JButton b : buttons) {
+        for (int i = 0; i < buttons.size(); i++) {
+            JButton b = buttons.get(i);
             boolean selected = screen.equals(b.getClientProperty("screen"));
-            b.setFont(selected ? Theme.bold(9) : Theme.regular(9));
-            b.setForeground(selected ? Theme.RED : Theme.MUTED);
+            Color color = selected ? Theme.RED : Theme.MUTED;
+            labels.get(i).setFont(selected ? Theme.bold(9) : Theme.regular(9));
+            labels.get(i).setForeground(color);
+            icons.get(i).setColor(color);
         }
     }
 }
