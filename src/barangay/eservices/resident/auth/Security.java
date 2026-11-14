@@ -117,8 +117,8 @@ public class Security extends JFrame {
     // ---- Actions ----
 
     private void goBack() {
-        new ProfileScreen().setVisible(true);
         dispose();
+        ProfileScreen.showWindow();
     }
 
     private void onChangePassword() {
