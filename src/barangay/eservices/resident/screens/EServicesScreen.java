@@ -8,47 +8,6 @@ import java.awt.geom.*;
 import java.util.ArrayList;
 import java.util.List;
 
-class DocumentRequest {
-    private final String title;
-    private final String requirements;
-    private final String processing;
-    private final Fee fee;
-
-    DocumentRequest(String title, String requirements, String processing, Fee fee) {
-        this.title = title;
-        this.requirements = requirements;
-        this.processing = processing;
-        this.fee = fee;
-    }
-
-    public String getTitle()        { return title; }
-    public String getRequirements() { return requirements; }
-    public String getProcessing()   { return processing; }
-    public Fee getFee()             { return fee; }
-}
-
-interface Fee {
-    JComponent createTag();
-}
-
-class PaidFee implements Fee {
-    private final String amount;
-    PaidFee(String amount) { this.amount = amount; }
-
-    @Override
-    public JComponent createTag() {
-        // gray pill that shows the amount, e.g. "\u20B150.00"
-        return new Badge(amount, new Color(0xF3, 0xF4, 0xF6), new Color(0x37, 0x41, 0x51), null, 10);
-    }
-}
-
-class FreeFee implements Fee {
-    @Override
-    public JComponent createTag() {
-        return new Badge("Free", Theme.GREEN_SOFT, Theme.GREEN, null);
-    }
-}
-
 class EServicesScreen extends ScrollableScreen {
     @Override protected String getHeaderTitle()    { return "Barangay E-Services"; }
     @Override protected AppSection createContent() { return new DocumentList(EServicesData.getDocuments()); }
