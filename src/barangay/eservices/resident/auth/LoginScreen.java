@@ -40,10 +40,10 @@ public class LoginScreen extends JFrame {
         title.setBounds(0, 122, W, 56);
         root.add(title);
 
-        // "Welcome back!" with red drop shadow
-        ShadowLabel welcome = new ShadowLabel("Welcome back!", LoginTheme.RED);
+        JLabel welcome = new JLabel("Welcome back!");
         welcome.setFont(LoginTheme.font(Font.BOLD, 28f));
-        welcome.setBounds(18, 280, 320, 50);
+        welcome.setForeground(LoginTheme.RED);
+        welcome.setBounds(24, 280, 320, 50);
         root.add(welcome);
 
         JLabel subtitle = new JLabel(
@@ -133,7 +133,8 @@ public class LoginScreen extends JFrame {
                         "Login failed", JOptionPane.WARNING_MESSAGE);
                 return;
             }
-            JOptionPane.showMessageDialog(this, "Login successful.");
+            dispose();
+            new HomeWindow().setVisible(true);
         } catch (IOException | GeneralSecurityException ex) {
             JOptionPane.showMessageDialog(this, "Could not read the local account store:\n" + ex.getMessage(),
                     "Login error", JOptionPane.ERROR_MESSAGE);
