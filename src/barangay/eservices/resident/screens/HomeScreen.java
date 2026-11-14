@@ -11,47 +11,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-class PortalService {
-    private final String title;
-    private final String subtitle;
-    private final IconType icon;
-    private final Color soft;
-    private final Color accent;
-    private final String target;   // screen key to open, or null for a simple dialog
-
-    PortalService(String title, String subtitle, IconType icon, Color soft, Color accent, String target) {
-        this.title = title;
-        this.subtitle = subtitle;
-        this.icon = icon;
-        this.soft = soft;
-        this.accent = accent;
-        this.target = target;
-    }
-
-    public String getTitle()    { return title; }
-    public String getSubtitle() { return subtitle; }
-    public IconType getIcon()   { return icon; }
-    public Color getSoft()      { return soft; }
-    public Color getAccent()    { return accent; }
-    public String getTarget()   { return target; }
-}
-
-class Announcement {
-    private final String tag;
-    private final String date;
-    private final String title;
-
-    Announcement(String tag, String date, String title) {
-        this.tag = tag;
-        this.date = date;
-        this.title = title;
-    }
-
-    public String getTag()   { return tag; }
-    public String getDate()  { return date; }
-    public String getTitle() { return title; }
-}
-
 class HomeScreen extends ScrollableScreen {
     private final NavListener nav;
     HomeScreen(NavListener nav) { this.nav = nav; }
