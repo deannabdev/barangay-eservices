@@ -235,3 +235,57 @@ class HomeData {
         return list;
     }
 }
+
+class HomeWindow extends JFrame {
+    private static final int W = 351, H = 775;
+    private final Navigator navigator;
+
+    HomeWindow() {
+        this("Home");
+    }
+
+    HomeWindow(String initialScreen) {
+        super("Barangay Central Signal Hub");
+        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setResizable(false);
+
+        CardLayout cardLayout = new CardLayout();
+        JPanel screens = new JPanel(cardLayout);
+        navigator = new Navigator(cardLayout, screens);
+
+        screens.add(new HomeScreen(navigator).init(), "Home");
+        screens.add(new EServicesScreen().init(), "E-Services");
+        screens.add(new ReportsScreen().init(), "Reports");
+        screens.add(new TransportScreen(navigator).init(), "Transport");
+        screens.add(new EmergencyScreen(navigator).init(), "Emergency");
+        screens.add(new GuideScreen().init(), "Guide");
+        screens.add(new DirectoryScreen().init(), "Directory");
+        screens.add(new ProfileScreen(navigator), "Profile");
+
+        String[] screenNames = {"Home", "E-Services", "Reports", "Guide", "Profile"};
+        ProfileNavBar bottomNav = new ProfileNavBar(0, index -> {
+            navigator.onNavigate(screenNames[index]);
+        });
+
+        JPanel root = new JPanel(new BorderLayout());
+        root.add(screens, BorderLayout.CENTER);
+        root.add(bottomNav, BorderLayout.SOUTH);
+        root.setPreferredSize(new Dimension(W, H));
+        setContentPane(root);
+
+        navigator.attach(screen -> {
+            int active = switch (screen) {
+                case "E-Services" -> 1;
+                case "Reports" -> 2;
+                case "Guide" -> 3;
+                case "Profile" -> 4;
+                default -> 0;
+            };
+            bottomNav.setActive(active);
+        });
+
+        pack();
+        setLocationRelativeTo(null);
+        navigator.onNavigate(initialScreen);
+    }
+}
