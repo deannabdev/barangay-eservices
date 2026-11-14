@@ -208,8 +208,8 @@ public class ProfileInfo extends JFrame {
                     "Unsaved changes", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
             if (answer != JOptionPane.YES_OPTION) return;
         }
-        new ProfileScreen().setVisible(true);
         dispose();
+        ProfileScreen.showWindow();
     }
 
     private void onSave() {
@@ -240,10 +240,8 @@ public class ProfileInfo extends JFrame {
         // Back to the profile screen showing the updated details
         String fullName = (firstName.getText().trim() + " " + lastName.getText().trim()
                 + " " + suffix.getText().trim()).trim();
-        ProfileScreen profile = new ProfileScreen();
-        profile.setUser(fullName, email.getText().trim(), mobile.getText().trim());
-        profile.setVisible(true);
         dispose();
+        ProfileScreen.showWindow(fullName, email.getText().trim(), mobile.getText().trim());
     }
 
 
