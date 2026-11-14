@@ -1,13 +1,19 @@
 package barangay.eservices;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
+import java.util.function.Consumer;
 
 // ============================== THEME ==============================
 final class Theme {
@@ -438,51 +444,31 @@ enum IconType {
     DOCUMENT {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            int w = size * 3 / 4, h = size * 4 / 5;
-            int x = (size - w) / 2, y = (size - h) / 2;
-            g.fillRect(x, y + h / 4, w, h * 3 / 4);
-            g.fillRect(x + w / 4, y, w / 2, h / 4);
-            g.fillRect(x + w / 4, y + h / 2, w / 2, h / 6);
+            drawVector(g, size, color, HomeComponents.VectorIcon.Type.DOCUMENT);
         }
     },
     REPORT {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            int cx = size / 2, cy = size / 2, r = size / 3;
-            g.fillOval(cx - r, cy - r, 2 * r, 2 * r);
-            g.fillRect(cx - r / 3, cy - r / 4, r * 2 / 3, r / 2);
+            drawVector(g, size, color, HomeComponents.VectorIcon.Type.ALERT_CIRCLE);
         }
     },
     TRUCK {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.fillRect(size / 5, size / 3, size * 3 / 10, size / 3);
-            g.fillRect(size / 2, size / 4, size * 2 / 5, size / 2);
-            g.fillOval(size / 4, size * 2 / 3, size / 5, size / 5);
-            g.fillOval(size / 2, size * 2 / 3, size / 5, size / 5);
+            drawVector(g, size, color, HomeComponents.VectorIcon.Type.TRUCK);
         }
     },
     SHOP {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.fillRect(size / 4, size / 3, size / 2, size / 2);
-            g.fillRect(size / 3, size / 6, size / 3, size / 4);
-            g.setStroke(new BasicStroke(size / 20));
-            g.drawLine(size / 4, size / 3, size / 4, size * 5 / 6);
-            g.drawLine(size * 3 / 4, size / 3, size * 3 / 4, size * 5 / 6);
+            drawVector(g, size, color, HomeComponents.VectorIcon.Type.BUILDING);
         }
     },
     SOS {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            Font f = new Font("Arial", Font.BOLD, size / 2);
-            g.setFont(f);
-            g.drawString("SOS", size / 6, size * 3 / 5);
+            drawVector(g, size, color, HomeComponents.VectorIcon.Type.ALERT_TRIANGLE);
         }
     },
     ROAD {
@@ -496,17 +482,13 @@ enum IconType {
     TRASH {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.fillRect(size / 3, size / 4, size / 3, size / 2);
-            g.fillRect(size / 2 - size / 8, size / 6, size / 4, size / 8);
+            drawReportIcon(g, size, color, ReportsComponents.ReportIcon.Type.TRASH);
         }
     },
     LIGHT {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.fillOval(size / 4, size / 6, size / 2, size / 2);
-            g.fillRect(size / 2 - size / 12, size * 2 / 3, size / 6, size / 4);
+            drawReportIcon(g, size, color, ReportsComponents.ReportIcon.Type.STREETLIGHT_OFF);
         }
     },
     WATER {
@@ -520,9 +502,7 @@ enum IconType {
     SHIELD {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.fillRect(size / 3, size / 4, size / 3, size / 2);
-            g.fillOval(size / 4, size / 4, size / 2, size / 3);
+            drawVector(g, size, color, HomeComponents.VectorIcon.Type.SHIELD);
         }
     },
     HEALTH {
@@ -567,111 +547,73 @@ enum IconType {
     PHONE {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.fillOval(size / 3, size / 6, size / 3, size * 2 / 3);
-            g.fillOval(size / 2 - size / 8, size / 4 - size / 8, size / 4, size / 4);
+            drawVector(g, size, color, HomeComponents.VectorIcon.Type.PHONE);
         }
     },
     ARROW_LEFT {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.fillPolygon(new int[]{size / 3, size * 2 / 3, size / 2},
-                          new int[]{size / 3, size / 3, size * 2 / 3}, 3);
+            drawTransportIcon(g, size, color, TransportComponents.TransportIcon.Type.ARROW_LEFT);
         }
     },
     WARNING {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.fillPolygon(new int[]{size / 2, size / 4, size * 3 / 4},
-                          new int[]{size / 6, size * 5 / 6, size * 5 / 6}, 3);
-            g.fillRect(size / 2 - size / 12, size / 3 - size / 12, size / 6, size / 6);
+            drawVector(g, size, color, HomeComponents.VectorIcon.Type.ALERT_TRIANGLE);
         }
     },
     MAGNIFIER {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            drawSearch(g, size, color);
+            drawDirectoryIcon(g, size, color, DirectoryComponents.DirectoryIcon.Type.SEARCH);
         }
     },
     SEARCH {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            drawSearch(g, size, color);
+            drawDirectoryIcon(g, size, color, DirectoryComponents.DirectoryIcon.Type.SEARCH);
         }
     },
     STORE {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            SHOP.draw(g, size, color);
+            drawDirectoryIcon(g, size, color, DirectoryComponents.DirectoryIcon.Type.STORE);
         }
     },
     STAR {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            int cx = size / 2, cy = size / 2;
-            int outer = size * 2 / 5, inner = outer * 2 / 5;
-            int[] x = new int[10], y = new int[10];
-            for (int i = 0; i < 10; i++) {
-                double angle = -Math.PI / 2 + i * Math.PI / 5;
-                int radius = i % 2 == 0 ? outer : inner;
-                x[i] = cx + (int) (Math.cos(angle) * radius);
-                y[i] = cy + (int) (Math.sin(angle) * radius);
-            }
-            g.fillPolygon(x, y, x.length);
+            drawDirectoryIcon(g, size, color, DirectoryComponents.DirectoryIcon.Type.STAR);
         }
     },
     USERS {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.fillOval(size / 6, size / 5, size / 4, size / 4);
-            g.fillOval(size * 3 / 5, size / 5, size / 4, size / 4);
-            g.fillRoundRect(size / 12, size / 2, size * 5 / 12, size / 3, size / 5, size / 5);
-            g.fillRoundRect(size / 2, size / 2, size * 5 / 12, size / 3, size / 5, size / 5);
+            drawTransportIcon(g, size, color, TransportComponents.TransportIcon.Type.USERS);
         }
     },
     BOX {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            int left = size / 5, right = size * 4 / 5, top = size / 4, bottom = size * 3 / 4;
-            int middle = size / 2;
-            g.drawPolygon(new int[]{left, middle, right, right, middle, left},
-                          new int[]{top, size / 8, top, bottom, size * 7 / 8, bottom}, 6);
-            g.drawLine(left, top, left, bottom);
-            g.drawLine(right, top, right, bottom);
-            g.drawLine(middle, size / 8, middle, size * 7 / 8);
+            drawTransportIcon(g, size, color, TransportComponents.TransportIcon.Type.BOX);
         }
     },
     CIRCLE_X {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            int inset = size / 6;
-            g.setStroke(new BasicStroke(Math.max(1f, size / 10f)));
-            g.drawOval(inset, inset, size - 2 * inset, size - 2 * inset);
-            g.drawLine(size / 3, size / 3, size * 2 / 3, size * 2 / 3);
-            g.drawLine(size * 2 / 3, size / 3, size / 3, size * 2 / 3);
+            drawTransportIcon(g, size, color, TransportComponents.TransportIcon.Type.X_CIRCLE);
         }
     },
     PLUS {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.fillRect(size * 2 / 5, size / 5, size / 5, size * 3 / 5);
-            g.fillRect(size / 5, size * 2 / 5, size * 3 / 5, size / 5);
+            drawReportIcon(g, size, color, ReportsComponents.ReportIcon.Type.PLUS);
         }
     },
     CHEVRON {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.setStroke(new BasicStroke(Math.max(1f, size / 8f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g.drawLine(size / 3, size / 5, size * 2 / 3, size / 2);
-            g.drawLine(size * 2 / 3, size / 2, size / 3, size * 4 / 5);
+            drawVector(g, size, color, HomeComponents.VectorIcon.Type.CHEVRON);
         }
     },
     BULB {
@@ -683,10 +625,7 @@ enum IconType {
     TRIANGLE {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.setStroke(new BasicStroke(Math.max(1f, size / 10f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g.drawPolygon(new int[]{size / 2, size / 6, size * 5 / 6},
-                          new int[]{size / 6, size * 5 / 6, size * 5 / 6}, 3);
+            drawVector(g, size, color, HomeComponents.VectorIcon.Type.ALERT_TRIANGLE);
         }
     },
     DOC {
@@ -698,53 +637,13 @@ enum IconType {
     GAVEL {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.setStroke(new BasicStroke(Math.max(1f, size / 7f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g.drawLine(size / 3, size / 3, size * 2 / 3, size * 2 / 3);
-            g.drawLine(size / 5, size / 5, size / 2, size / 2);
-            g.drawLine(size / 2, size / 2, size * 4 / 5, size * 4 / 5);
-            g.drawLine(size / 3, size * 4 / 5, size * 4 / 5, size * 4 / 5);
-        }
-    },
-    ALERT_CIRCLE {
-        @Override
-        public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            int inset = size / 7;
-            g.setStroke(new BasicStroke(Math.max(1f, size / 10f)));
-            g.drawOval(inset, inset, size - 2 * inset, size - 2 * inset);
-            g.drawLine(size / 2, size / 4, size / 2, size * 3 / 5);
-            g.fillOval(size / 2 - size / 16, size * 2 / 3, size / 8, size / 8);
-        }
-    },
-    BOOK {
-        @Override
-        public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.setStroke(new BasicStroke(Math.max(1f, size / 10f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g.drawRoundRect(size / 6, size / 5, size / 3, size * 3 / 5, size / 10, size / 10);
-            g.drawRoundRect(size / 2, size / 5, size / 3, size * 3 / 5, size / 10, size / 10);
-            g.drawLine(size / 2, size / 5, size / 2, size * 4 / 5);
-        }
-    },
-    BUILDING {
-        @Override
-        public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.drawRect(size / 4, size / 3, size / 2, size * 11 / 20);
-            g.drawPolygon(new int[]{size / 6, size / 2, size * 5 / 6},
-                          new int[]{size / 3, size / 8, size / 3}, 3);
-            g.drawRect(size * 2 / 5, size * 3 / 5, size / 5, size * 11 / 60);
-            g.drawLine(size / 3, size / 2, size / 3, size / 2);
-            g.drawLine(size * 2 / 3, size / 2, size * 2 / 3, size / 2);
+            drawReportIcon(g, size, color, ReportsComponents.ReportIcon.Type.GAVEL);
         }
     },
     PERSON {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.fillOval(size * 3 / 8, size / 6, size / 4, size / 4);
-            g.fillRoundRect(size / 4, size / 2, size / 2, size / 3, size / 4, size / 4);
+            drawVector(g, size, color, HomeComponents.VectorIcon.Type.USER);
         }
     },
     INFO {
@@ -770,87 +669,54 @@ enum IconType {
     NAV_HOME {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.setStroke(new BasicStroke(Math.max(1.5f, size / 12f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            Path2D house = new Path2D.Double();
-            house.moveTo(size / 6.0, size / 2.0);
-            house.lineTo(size / 2.0, size / 6.0);
-            house.lineTo(size * 5 / 6.0, size / 2.0);
-            house.moveTo(size / 4.0, size * 2 / 5.0);
-            house.lineTo(size / 4.0, size * 5 / 6.0);
-            house.lineTo(size * 3 / 4.0, size * 5 / 6.0);
-            house.lineTo(size * 3 / 4.0, size * 2 / 5.0);
-            house.moveTo(size * 9 / 20.0, size * 5 / 6.0);
-            house.lineTo(size * 9 / 20.0, size * 3 / 5.0);
-            house.lineTo(size * 11 / 20.0, size * 3 / 5.0);
-            house.lineTo(size * 11 / 20.0, size * 5 / 6.0);
-            g.draw(house);
+            drawVector(g, size, color, HomeComponents.VectorIcon.Type.HOME);
         }
     },
     NAV_DOCUMENT {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.setStroke(new BasicStroke(Math.max(1.5f, size / 12f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            Path2D page = new Path2D.Double();
-            page.moveTo(size / 4.0, size / 8.0);
-            page.lineTo(size * 3 / 5.0, size / 8.0);
-            page.lineTo(size * 3 / 4.0, size / 4.0);
-            page.lineTo(size * 3 / 4.0, size * 7 / 8.0);
-            page.lineTo(size / 4.0, size * 7 / 8.0);
-            page.closePath();
-            page.moveTo(size * 3 / 5.0, size / 8.0);
-            page.lineTo(size * 3 / 5.0, size / 4.0);
-            page.lineTo(size * 3 / 4.0, size / 4.0);
-            g.draw(page);
-            g.drawLine(size * 7 / 20, size * 9 / 20, size * 13 / 20, size * 9 / 20);
-            g.drawLine(size * 7 / 20, size * 3 / 5, size * 13 / 20, size * 3 / 5);
-            g.drawLine(size * 7 / 20, size * 3 / 4, size * 11 / 20, size * 3 / 4);
+            drawVector(g, size, color, HomeComponents.VectorIcon.Type.DOCUMENT);
         }
     },
     NAV_REPORT {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.setStroke(new BasicStroke(Math.max(1.5f, size / 12f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g.drawPolygon(new int[]{size / 2, size / 10, size * 9 / 10},
-                    new int[]{size / 8, size * 7 / 8, size * 7 / 8}, 3);
-            g.drawLine(size / 2, size * 2 / 5, size / 2, size * 3 / 5);
-            g.fillOval(size / 2 - Math.max(1, size / 20), size * 2 / 3,
-                    Math.max(2, size / 10), Math.max(2, size / 10));
+            drawVector(g, size, color, HomeComponents.VectorIcon.Type.ALERT_CIRCLE);
         }
     },
     NAV_GUIDE {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.setStroke(new BasicStroke(Math.max(1.5f, size / 12f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            Path2D book = new Path2D.Double();
-            book.moveTo(size / 2.0, size / 4.0);
-            book.curveTo(size * 3 / 8.0, size / 8.0, size / 4.0, size / 8.0, size / 8.0, size / 5.0);
-            book.lineTo(size / 8.0, size * 4 / 5.0);
-            book.curveTo(size / 4.0, size * 3 / 4.0, size * 3 / 8.0, size * 3 / 4.0, size / 2.0, size * 7 / 8.0);
-            book.curveTo(size * 5 / 8.0, size * 3 / 4.0, size * 3 / 4.0, size * 3 / 4.0, size * 7 / 8.0, size * 4 / 5.0);
-            book.lineTo(size * 7 / 8.0, size / 5.0);
-            book.curveTo(size * 3 / 4.0, size / 8.0, size * 5 / 8.0, size / 8.0, size / 2.0, size / 4.0);
-            book.closePath();
-            book.moveTo(size / 2.0, size / 4.0);
-            book.lineTo(size / 2.0, size * 7 / 8.0);
-            g.draw(book);
+            drawVector(g, size, color, HomeComponents.VectorIcon.Type.BOOK);
         }
     },
     NAV_PROFILE {
         @Override
         public void draw(Graphics2D g, int size, Color color) {
-            g.setColor(color);
-            g.setStroke(new BasicStroke(Math.max(1.5f, size / 12f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-            g.drawOval(size / 8, size / 8, size * 3 / 4, size * 3 / 4);
-            g.drawOval(size * 7 / 16, size / 4, size / 8, size / 8);
-            g.drawArc(size / 3, size * 9 / 20, size / 3, size * 2 / 5, 0, 180);
+            drawVector(g, size, color, HomeComponents.VectorIcon.Type.USER);
         }
     };
 
     public abstract void draw(Graphics2D g, int size, Color color);
+
+    private static void drawVector(Graphics2D g, int size, Color color, HomeComponents.VectorIcon.Type type) {
+        new HomeComponents.VectorIcon(type, size, color).paintIcon(null, g, 0, 0);
+    }
+
+    private static void drawReportIcon(Graphics2D g, int size, Color color,
+                                       ReportsComponents.ReportIcon.Type type) {
+        new ReportsComponents.ReportIcon(type, size, color).paintIcon(null, g, 0, 0);
+    }
+
+    private static void drawTransportIcon(Graphics2D g, int size, Color color,
+                                          TransportComponents.TransportIcon.Type type) {
+        new TransportComponents.TransportIcon(type, size, color).paintIcon(null, g, 0, 0);
+    }
+
+    private static void drawDirectoryIcon(Graphics2D g, int size, Color color,
+                                          DirectoryComponents.DirectoryIcon.Type type) {
+        new DirectoryComponents.DirectoryIcon(type, size, color).paintIcon(null, g, 0, 0);
+    }
 
     public void draw(Graphics2D g, int x, int y, int size) {
         Graphics2D icon = (Graphics2D) g.create(x, y, size, size);
@@ -858,13 +724,6 @@ enum IconType {
         icon.dispose();
     }
 
-    private static void drawSearch(Graphics2D g, int size, Color color) {
-        g.setColor(color);
-        g.setStroke(new BasicStroke(Math.max(1f, size / 8f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        int diameter = size * 3 / 5;
-        g.drawOval(size / 8, size / 8, diameter, diameter);
-        g.drawLine(size * 3 / 5, size * 3 / 5, size * 7 / 8, size * 7 / 8);
-    }
 }
 
 // ===================== SHARED UI COMPONENTS =====================
@@ -1084,6 +943,7 @@ abstract class ScrollableScreen extends AppSection {
     protected abstract AppSection createContent();
     protected Runnable getBackAction() { return null; }
     protected boolean hasHeader() { return true; }
+    protected JComponent getFixedHeader() { return null; }
     protected Color getBackgroundColor() { return Theme.BG; }
 
     @Override
@@ -1115,6 +975,11 @@ abstract class ScrollableScreen extends AppSection {
                 header.add(backButton, BorderLayout.WEST);
             }
             add(header, BorderLayout.NORTH);
+        }
+
+        JComponent fixedHeader = getFixedHeader();
+        if (fixedHeader != null) {
+            add(fixedHeader, BorderLayout.NORTH);
         }
 
         JScrollPane scroll = new JScrollPane(createContent().init());
@@ -1230,5 +1095,1334 @@ class StatusBar extends JPanel implements NavListener {
     @Override
     public void onNavigate(String screen) {
         label.setText("Barangay Central Signal — " + screen);
+    }
+}
+
+/**
+ * Reusable UI pieces for the Barangay Central Signal Hub home screen.
+ * Icons are drawn with Graphics2D, so no image files are needed.
+ */
+final class HomeComponents {
+
+    private HomeComponents() {}
+
+    // ---------------------------------------------------------------- palette
+    public static final Color PRIMARY        = new Color(0xD32F2F);
+    public static final Color PRIMARY_DARK   = new Color(0xC62828);
+    public static final Color PRIMARY_SOFT   = new Color(0xFDECEC);
+    public static final Color PRIMARY_BORDER = new Color(0xF5A3A3);
+    public static final Color BACKGROUND     = new Color(0xF8F9FB);
+    public static final Color CARD           = Color.WHITE;
+    public static final Color CARD_BORDER    = new Color(0xE5E7EB);
+    public static final Color CARD_HOVER     = new Color(0xF3F4F6);
+    public static final Color TEXT_DARK      = new Color(0x111827);
+    public static final Color TEXT_BODY      = new Color(0x4B5563);
+    public static final Color TEXT_MUTED     = new Color(0x4B5563);
+
+    /** Screen size (the window's content area). */
+    public static final int W = 351;
+    public static final int H = 775;
+
+    /** Width inside the Home screen's 16 px gutters and vertical scroll bar. */
+    public static final int CONTENT_WIDTH = W - 48;
+
+    public static Font font(int style, int size) {
+        return new Font("Segoe UI", style, size);
+    }
+
+    // ---------------------------------------------------------------- helpers
+
+    /** Left-aligns a component and lets it stretch horizontally inside a vertical BoxLayout. */
+    public static <T extends JComponent> T fullWidth(T c) {
+        c.setAlignmentX(Component.LEFT_ALIGNMENT);
+        Dimension d = c.getPreferredSize();
+        c.setMaximumSize(new Dimension(Integer.MAX_VALUE, d.height));
+        return c;
+    }
+
+    public static void makeClickable(JComponent c, Runnable action) {
+        c.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        c.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) {
+                if (action != null) action.run();
+            }
+        });
+    }
+
+    private static void antialias(Graphics2D g2) {
+        g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+        g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+    }
+
+    // ------------------------------------------------------------ vector icons
+
+    /** Simple line icons drawn on a 24x24 grid and scaled to the requested size. */
+    public static class VectorIcon implements Icon {
+
+        public enum Type {
+            SHIELD, TRUCK, DOCUMENT, ALERT_CIRCLE, ALERT_TRIANGLE,
+            PHONE, BOOK, BUILDING, HOME, USER, CHEVRON
+        }
+
+        private final Type type;
+        private final int size;
+        private Color color;
+
+        public VectorIcon(Type type, int size, Color color) {
+            this.type = type;
+            this.size = size;
+            this.color = color;
+        }
+
+        public void setColor(Color color) { this.color = color; }
+
+        @Override public int getIconWidth()  { return size; }
+        @Override public int getIconHeight() { return size; }
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            antialias(g2);
+            g2.translate(x, y);
+            double s = size / 24.0;
+            g2.scale(s, s);
+            g2.setColor(color);
+            g2.setStroke(new BasicStroke(1.8f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+            switch (type) {
+                case SHIELD: {
+                    Path2D p = new Path2D.Double();
+                    p.moveTo(12, 3);
+                    p.lineTo(19, 6);
+                    p.lineTo(19, 12);
+                    p.curveTo(19, 16.5, 15.5, 19.5, 12, 21);
+                    p.curveTo(8.5, 19.5, 5, 16.5, 5, 12);
+                    p.lineTo(5, 6);
+                    p.closePath();
+                    g2.draw(p);
+                    break;
+                }
+                case TRUCK: {
+                    g2.draw(new RoundRectangle2D.Double(2, 6, 12, 10, 2, 2));
+                    Path2D cab = new Path2D.Double();
+                    cab.moveTo(14, 9.5);
+                    cab.lineTo(18, 9.5);
+                    cab.lineTo(21.5, 13);
+                    cab.lineTo(21.5, 16);
+                    cab.lineTo(14, 16);
+                    g2.draw(cab);
+                    g2.fill(new Ellipse2D.Double(5, 14.5, 4.5, 4.5));
+                    g2.fill(new Ellipse2D.Double(15.5, 14.5, 4.5, 4.5));
+                    break;
+                }
+                case DOCUMENT: {
+                    Path2D p = new Path2D.Double();
+                    p.moveTo(6, 3);
+                    p.lineTo(14, 3);
+                    p.lineTo(19, 8);
+                    p.lineTo(19, 21);
+                    p.lineTo(6, 21);
+                    p.closePath();
+                    g2.draw(p);
+                    Path2D fold = new Path2D.Double();
+                    fold.moveTo(14, 3);
+                    fold.lineTo(14, 8);
+                    fold.lineTo(19, 8);
+                    g2.draw(fold);
+                    g2.draw(new Line2D.Double(9, 13, 16, 13));
+                    g2.draw(new Line2D.Double(9, 17, 16, 17));
+                    break;
+                }
+                case ALERT_CIRCLE: {
+                    g2.draw(new Ellipse2D.Double(3, 3, 18, 18));
+                    g2.draw(new Line2D.Double(12, 7.5, 12, 13));
+                    g2.fill(new Ellipse2D.Double(11, 15.2, 2, 2));
+                    break;
+                }
+                case ALERT_TRIANGLE: {
+                    Path2D p = new Path2D.Double();
+                    p.moveTo(12, 3.5);
+                    p.lineTo(22, 20.5);
+                    p.lineTo(2, 20.5);
+                    p.closePath();
+                    g2.draw(p);
+                    g2.draw(new Line2D.Double(12, 9.5, 12, 14));
+                    g2.fill(new Ellipse2D.Double(11, 16, 2, 2));
+                    break;
+                }
+                case PHONE: {
+                    Path2D p = new Path2D.Double();
+                    p.moveTo(5, 4);
+                    p.lineTo(9, 4);
+                    p.lineTo(11, 9);
+                    p.lineTo(9, 11);
+                    p.curveTo(10, 13, 11, 14, 13, 15);
+                    p.lineTo(15, 13);
+                    p.lineTo(20, 15);
+                    p.lineTo(20, 19);
+                    p.curveTo(20, 20, 19, 21, 18, 21);
+                    p.curveTo(10, 21, 3, 14, 3, 6);
+                    p.curveTo(3, 5, 4, 4, 5, 4);
+                    p.closePath();
+                    g2.draw(p);
+                    break;
+                }
+                case BOOK: {
+                    Path2D left = new Path2D.Double();
+                    left.moveTo(12, 6);
+                    left.curveTo(10, 4, 6, 4, 3, 5);
+                    left.lineTo(3, 19);
+                    left.curveTo(6, 18, 10, 18, 12, 20);
+                    g2.draw(left);
+                    Path2D right = new Path2D.Double();
+                    right.moveTo(12, 6);
+                    right.curveTo(14, 4, 18, 4, 21, 5);
+                    right.lineTo(21, 19);
+                    right.curveTo(18, 18, 14, 18, 12, 20);
+                    g2.draw(right);
+                    g2.draw(new Line2D.Double(12, 6, 12, 20));
+                    break;
+                }
+                case BUILDING: {
+                    g2.draw(new Rectangle2D.Double(5, 3, 14, 18));
+                    g2.fill(new Rectangle2D.Double(8, 6, 2.5, 2.5));
+                    g2.fill(new Rectangle2D.Double(13.5, 6, 2.5, 2.5));
+                    g2.fill(new Rectangle2D.Double(8, 11, 2.5, 2.5));
+                    g2.fill(new Rectangle2D.Double(13.5, 11, 2.5, 2.5));
+                    g2.draw(new Rectangle2D.Double(10, 16, 4, 5));
+                    break;
+                }
+                case HOME: {
+                    Path2D roof = new Path2D.Double();
+                    roof.moveTo(3, 11);
+                    roof.lineTo(12, 3);
+                    roof.lineTo(21, 11);
+                    g2.draw(roof);
+                    Path2D body = new Path2D.Double();
+                    body.moveTo(5, 10);
+                    body.lineTo(5, 21);
+                    body.lineTo(19, 21);
+                    body.lineTo(19, 10);
+                    g2.draw(body);
+                    Path2D door = new Path2D.Double();
+                    door.moveTo(10, 21);
+                    door.lineTo(10, 14);
+                    door.lineTo(14, 14);
+                    door.lineTo(14, 21);
+                    g2.draw(door);
+                    break;
+                }
+                case USER: {
+                    g2.draw(new Ellipse2D.Double(3, 3, 18, 18));
+                    g2.draw(new Ellipse2D.Double(9, 7, 6, 6));
+                    g2.draw(new Arc2D.Double(6.5, 14, 11, 9, 0, 180, Arc2D.OPEN));
+                    break;
+                }
+                case CHEVRON: {
+                    Path2D p = new Path2D.Double();
+                    p.moveTo(9, 5);
+                    p.lineTo(16, 12);
+                    p.lineTo(9, 19);
+                    g2.draw(p);
+                    break;
+                }
+            }
+
+            g2.dispose();
+        }
+    }
+
+    // --------------------------------------------------------- base components
+
+    /** Panel with rounded corners, optional border and optional diagonal gradient. */
+    public static class RoundedPanel extends JPanel {
+        private final int arc;
+        private Color fill;
+        private final Color border;
+        private Color gradientEnd;
+
+        public RoundedPanel(int arc, Color fill, Color border) {
+            this.arc = arc;
+            this.fill = fill;
+            this.border = border;
+            setOpaque(false);
+        }
+
+        public void setFill(Color fill) {
+            this.fill = fill;
+            repaint();
+        }
+
+        public void setGradient(Color start, Color end) {
+            this.fill = start;
+            this.gradientEnd = end;
+            repaint();
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            antialias(g2);
+            int w = getWidth(), h = getHeight();
+            if (gradientEnd != null) {
+                g2.setPaint(new GradientPaint(0, 0, fill, w, h, gradientEnd));
+            } else {
+                g2.setColor(fill);
+            }
+            g2.fill(new RoundRectangle2D.Double(0, 0, w - 1, h - 1, arc, arc));
+            if (border != null) {
+                g2.setColor(border);
+                g2.setStroke(new BasicStroke(1f));
+                g2.draw(new RoundRectangle2D.Double(0.5, 0.5, w - 2, h - 2, arc, arc));
+            }
+            g2.dispose();
+            super.paintComponent(g);
+        }
+    }
+
+    /** Fixed-size rounded square (or circle) with a centered icon. */
+    public static class IconTile extends JComponent {
+        private final int box;
+        private final int arc;
+        private final Color bg;
+        private final Icon icon;
+
+        public IconTile(int box, int arc, Color bg, Icon icon) {
+            this.box = box;
+            this.arc = arc;
+            this.bg = bg;
+            this.icon = icon;
+            Dimension d = new Dimension(box, box);
+            setPreferredSize(d);
+            setMinimumSize(d);
+            setMaximumSize(d);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            antialias(g2);
+            int x = (getWidth() - box) / 2;
+            int y = (getHeight() - box) / 2;
+            g2.setColor(bg);
+            g2.fill(new RoundRectangle2D.Double(x, y, box, box, arc, arc));
+            icon.paintIcon(this,
+                    g2,
+                    x + (box - icon.getIconWidth()) / 2,
+                    y + (box - icon.getIconHeight()) / 2);
+            g2.dispose();
+        }
+    }
+
+    /** Bold heading used above each section. */
+    public static class SectionTitle extends JLabel {
+        public SectionTitle(String text) {
+            super(text);
+            setFont(font(Font.BOLD, 16));
+            setForeground(TEXT_DARK);
+        }
+    }
+
+    /** Scroll-friendly panel that always matches the viewport width. */
+    public static class ScrollablePanel extends JPanel implements Scrollable {
+        @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }
+        @Override public int getScrollableUnitIncrement(Rectangle r, int o, int d) { return 16; }
+        @Override public int getScrollableBlockIncrement(Rectangle r, int o, int d) { return r.height; }
+        @Override public boolean getScrollableTracksViewportWidth() { return true; }
+        @Override public boolean getScrollableTracksViewportHeight() { return false; }
+    }
+
+    // ----------------------------------------------------------- screen parts
+
+    /** Full-width top bar with the barangay name and location. */
+    public static class HeaderBar extends JPanel {
+        public HeaderBar(String title, String subtitle) {
+            this(title, subtitle, null);
+        }
+
+        public HeaderBar(String title, String subtitle, Runnable onBack) {
+            setLayout(new BorderLayout(10, 0));
+            setBackground(Color.WHITE);
+            setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(0, 0, 1, 0, CARD_BORDER),
+                    BorderFactory.createEmptyBorder(12, 16, 12, 16)));
+
+            JComponent leading;
+            if (onBack == null) {
+                leading = new IconTile(40, 40, PRIMARY_SOFT,
+                        new VectorIcon(VectorIcon.Type.SHIELD, 22, PRIMARY));
+            } else {
+                leading = new IconTile(40, 40, PRIMARY_SOFT,
+                        new TransportComponents.TransportIcon(
+                                TransportComponents.TransportIcon.Type.ARROW_LEFT, 20, PRIMARY));
+                makeClickable(leading, onBack);
+            }
+
+            JLabel t = new JLabel(title);
+            t.setFont(font(Font.BOLD, 15));
+            t.setForeground(TEXT_DARK);
+            JLabel s = new JLabel(subtitle);
+            s.setFont(font(Font.PLAIN, 11));
+            s.setForeground(TEXT_MUTED);
+
+            JPanel text = new JPanel();
+            text.setOpaque(false);
+            text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+            text.add(Box.createVerticalGlue());
+            text.add(t);
+            text.add(s);
+            text.add(Box.createVerticalGlue());
+
+            add(leading, BorderLayout.WEST);
+            add(text, BorderLayout.CENTER);
+        }
+    }
+
+    /** Red welcome banner. */
+    public static class HeroBanner extends RoundedPanel {
+        public HeroBanner(String title, String message) {
+            super(20, new Color(0x8B2323), null);
+            setGradient(new Color(0x8B2323), new Color(0xB04545));
+            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            setBorder(BorderFactory.createEmptyBorder(22, 18, 22, 18));
+
+            JLabel t = new JLabel(title);
+            t.setFont(font(Font.BOLD, 20));
+            t.setForeground(Color.WHITE);
+            t.setAlignmentX(LEFT_ALIGNMENT);
+
+            int textWidth = CONTENT_WIDTH - 36 - 8;
+            JLabel m = new JLabel("<html><body width='" + textWidth + "'>" + message + "</body></html>");
+            m.setFont(font(Font.PLAIN, 13));
+            m.setForeground(new Color(0xFBE4E4));
+            m.setAlignmentX(LEFT_ALIGNMENT);
+
+            add(t);
+            add(Box.createVerticalStrut(8));
+            add(m);
+        }
+    }
+
+    /** Square card used in the Quick Access Portal grid. */
+    public static class QuickAccessCard extends RoundedPanel {
+        public QuickAccessCard(VectorIcon.Type iconType, Color tileBg, Color iconColor,
+                               String title, String subtitle, Runnable onClick) {
+            super(14, CARD, CARD_BORDER);
+            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            setBorder(BorderFactory.createEmptyBorder(12, 8, 10, 2));
+            setPreferredSize(new Dimension(100, 104));
+
+            IconTile tile = new IconTile(40, 12, tileBg, new VectorIcon(iconType, 22, iconColor));
+            tile.setAlignmentX(LEFT_ALIGNMENT);
+
+            JLabel t = new JLabel(title);
+            t.setFont(font(Font.BOLD, 10));
+            t.setForeground(TEXT_DARK);
+            t.setAlignmentX(LEFT_ALIGNMENT);
+
+            JLabel s = new JLabel(subtitle);
+            s.setFont(font(Font.PLAIN, 11));
+            s.setForeground(TEXT_MUTED);
+            s.setAlignmentX(LEFT_ALIGNMENT);
+
+            add(tile);
+            add(Box.createVerticalStrut(10));
+            add(t);
+            add(Box.createVerticalStrut(2));
+            add(s);
+
+            makeClickable(this, onClick);
+            addMouseListener(new MouseAdapter() {
+                @Override public void mouseEntered(MouseEvent e) { setFill(CARD_HOVER); }
+                @Override public void mouseExited(MouseEvent e)  { setFill(CARD); }
+            });
+        }
+    }
+
+    /** News / advisory card shown under "Barangay Announcements". */
+    public static class AnnouncementCard extends RoundedPanel {
+        public AnnouncementCard(String tag, String date, String title, Runnable onClick) {
+            super(14, CARD, CARD_BORDER);
+            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            setBorder(BorderFactory.createEmptyBorder(14, 14, 14, 14));
+
+            RoundedPanel pill = new RoundedPanel(8, PRIMARY_SOFT, null);
+            pill.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 3));
+            JLabel tagLabel = new JLabel(tag.toUpperCase());
+            tagLabel.setFont(font(Font.BOLD, 10));
+            tagLabel.setForeground(PRIMARY_DARK);
+            pill.add(tagLabel);
+
+            JPanel pillWrap = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+            pillWrap.setOpaque(false);
+            pillWrap.add(pill);
+
+            JLabel dateLabel = new JLabel(date);
+            dateLabel.setFont(font(Font.PLAIN, 12));
+            dateLabel.setForeground(TEXT_BODY);
+
+            JPanel top = new JPanel(new BorderLayout());
+            top.setOpaque(false);
+            top.add(pillWrap, BorderLayout.WEST);
+            top.add(dateLabel, BorderLayout.EAST);
+            top.setAlignmentX(LEFT_ALIGNMENT);
+            top.setMaximumSize(new Dimension(Integer.MAX_VALUE, top.getPreferredSize().height));
+
+            JLabel titleLabel = new JLabel("<html><body width='" + (CONTENT_WIDTH - 32) + "'>"
+                    + title + "</body></html>");
+            titleLabel.setFont(font(Font.BOLD, 14));
+            titleLabel.setForeground(TEXT_DARK);
+            titleLabel.setAlignmentX(LEFT_ALIGNMENT);
+
+            add(top);
+            add(Box.createVerticalStrut(10));
+            add(titleLabel);
+
+            makeClickable(this, onClick);
+        }
+    }
+
+    /** Bottom tab bar (Home, E-Services, Reports, Guide, Profile). */
+    public static class BottomNavBar extends JPanel {
+
+        private final NavItem[] items;
+
+        public BottomNavBar(String selected, Consumer<String> onSelect) {
+            setLayout(new GridLayout(1, 5));
+            setBackground(Color.WHITE);
+            setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, CARD_BORDER));
+
+            items = new NavItem[] {
+                new NavItem("Home",       VectorIcon.Type.HOME),
+                new NavItem("E-Services", VectorIcon.Type.DOCUMENT),
+                new NavItem("Reports",    VectorIcon.Type.ALERT_TRIANGLE),
+                new NavItem("Guide",      VectorIcon.Type.BOOK),
+                new NavItem("Profile",    VectorIcon.Type.USER)
+            };
+
+            for (NavItem item : items) {
+                add(item);
+                makeClickable(item, () -> {
+                    setSelected(item.label);
+                    if (onSelect != null) onSelect.accept(item.label);
+                });
+            }
+            setSelected(selected);
+        }
+
+        public void setSelected(String label) {
+            for (NavItem item : items) {
+                item.setSelected(item.label.equals(label));
+            }
+        }
+
+        private static class NavItem extends JPanel {
+            final String label;
+            private final VectorIcon icon;
+            private final JLabel iconLabel;
+            private final JLabel textLabel;
+
+            NavItem(String label, VectorIcon.Type type) {
+                this.label = label;
+                setOpaque(false);
+                setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+                setBorder(BorderFactory.createEmptyBorder(9, 0, 9, 0));
+
+                icon = new VectorIcon(type, 22, TEXT_MUTED);
+                iconLabel = new JLabel(icon);
+                iconLabel.setAlignmentX(CENTER_ALIGNMENT);
+
+                textLabel = new JLabel(label);
+                textLabel.setFont(font(Font.PLAIN, 10));
+                textLabel.setForeground(TEXT_MUTED);
+                textLabel.setAlignmentX(CENTER_ALIGNMENT);
+
+                add(iconLabel);
+                add(Box.createVerticalStrut(3));
+                add(textLabel);
+            }
+
+            void setSelected(boolean selected) {
+                Color c = selected ? PRIMARY : TEXT_MUTED;
+                icon.setColor(c);
+                textLabel.setForeground(c);
+                textLabel.setFont(font(selected ? Font.BOLD : Font.PLAIN, 10));
+                repaint();
+            }
+        }
+    }
+}
+
+final class ReportsComponents {
+
+    private ReportsComponents() {}
+
+    public static final Color ICON_CIRCLE       = new Color(0xFEF2F2);
+    public static final Color STATUS_PENDING_BG = new Color(0xFEF3C7);
+    public static final Color STATUS_PENDING_FG = new Color(0xD97706);
+
+    // ------------------------------------------------------------------ icons
+
+    /** Extra line icons (24x24 grid) needed by the Reports screen. */
+    public static class ReportIcon implements Icon {
+
+        public enum Type { PLUS, STREETLIGHT_OFF, TRASH, TREE, GAVEL }
+
+        private final Type type;
+        private final int size;
+        private final Color color;
+
+        public ReportIcon(Type type, int size, Color color) {
+            this.type = type;
+            this.size = size;
+            this.color = color;
+        }
+
+        @Override public int getIconWidth()  { return size; }
+        @Override public int getIconHeight() { return size; }
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+            g2.translate(x, y);
+            double s = size / 24.0;
+            g2.scale(s, s);
+            g2.setColor(color);
+            g2.setStroke(new BasicStroke(1.8f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+            switch (type) {
+                case PLUS: {
+                    g2.draw(new Line2D.Double(12, 5, 12, 19));
+                    g2.draw(new Line2D.Double(5, 12, 19, 12));
+                    break;
+                }
+                case STREETLIGHT_OFF: {
+                    Path2D lamp = new Path2D.Double();
+                    lamp.moveTo(7, 9);
+                    lamp.lineTo(17, 9);
+                    lamp.lineTo(15, 5);
+                    lamp.lineTo(9, 5);
+                    lamp.closePath();
+                    g2.draw(lamp);
+                    g2.draw(new Line2D.Double(12, 9, 12, 20));
+                    g2.draw(new Line2D.Double(9, 20, 15, 20));
+                    g2.draw(new Line2D.Double(3.5, 3.5, 20.5, 20.5)); // "off" slash
+                    break;
+                }
+                case TRASH: {
+                    g2.draw(new Line2D.Double(4, 7, 20, 7));
+                    Path2D handle = new Path2D.Double();
+                    handle.moveTo(9, 7);
+                    handle.lineTo(9, 4);
+                    handle.lineTo(15, 4);
+                    handle.lineTo(15, 7);
+                    g2.draw(handle);
+                    Path2D body = new Path2D.Double();
+                    body.moveTo(6, 7);
+                    body.lineTo(7, 20);
+                    body.lineTo(17, 20);
+                    body.lineTo(18, 7);
+                    g2.draw(body);
+                    g2.draw(new Line2D.Double(10, 11, 10, 16));
+                    g2.draw(new Line2D.Double(14, 11, 14, 16));
+                    break;
+                }
+                case TREE: {
+                    Path2D p = new Path2D.Double();
+                    p.moveTo(12, 3);
+                    p.lineTo(18, 12);
+                    p.lineTo(15.5, 12);
+                    p.lineTo(19, 18);
+                    p.lineTo(5, 18);
+                    p.lineTo(8.5, 12);
+                    p.lineTo(6, 12);
+                    p.closePath();
+                    g2.draw(p);
+                    g2.draw(new Line2D.Double(12, 18, 12, 21));
+                    break;
+                }
+                case GAVEL: {
+                    AffineTransform old = g2.getTransform();
+                    g2.translate(15.5, 8.5);
+                    g2.rotate(Math.toRadians(45));
+                    g2.draw(new RoundRectangle2D.Double(-5, -3, 10, 6, 2, 2));
+                    g2.setTransform(old);
+                    g2.draw(new Line2D.Double(13, 11, 4.5, 19.5));
+                    break;
+                }
+            }
+
+            g2.dispose();
+        }
+    }
+
+    // ------------------------------------------------------------- components
+
+    /** Page heading plus short description. */
+    public static class IntroBlock extends JPanel {
+        public IntroBlock(String title, String description) {
+            setOpaque(false);
+            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+
+            JLabel t = new JLabel(title);
+            t.setFont(HomeComponents.font(Font.BOLD, 18));
+            t.setForeground(HomeComponents.TEXT_DARK);
+            t.setAlignmentX(LEFT_ALIGNMENT);
+
+            JLabel d = new JLabel("<html><div style='width:" + (HomeComponents.CONTENT_WIDTH - 4) + "px'>"
+                    + description + "</div></html>");
+            d.setFont(HomeComponents.font(Font.PLAIN, 12));
+            d.setForeground(HomeComponents.TEXT_BODY);
+            d.setAlignmentX(LEFT_ALIGNMENT);
+
+            add(t);
+            add(Box.createVerticalStrut(6));
+            add(d);
+        }
+    }
+
+    /** Big red call-to-action button: "Submit a New Report". */
+    public static class SubmitReportCard extends HomeComponents.RoundedPanel {
+        public SubmitReportCard(String title, String subtitle, Runnable onClick) {
+            super(14, HomeComponents.PRIMARY, null);
+            setGradient(new Color(0xD32F2F), new Color(0xB71C1C));
+            setLayout(new BorderLayout(14, 0));
+            setBorder(BorderFactory.createEmptyBorder(16, 14, 16, 16));
+
+            HomeComponents.IconTile plus = new HomeComponents.IconTile(44, 44, new Color(0x8E1B1B),
+                    new ReportIcon(ReportIcon.Type.PLUS, 22, Color.WHITE));
+
+            JLabel t = new JLabel(title);
+            t.setFont(HomeComponents.font(Font.BOLD, 14));
+            t.setForeground(Color.WHITE);
+            JLabel s = new JLabel(subtitle);
+            s.setFont(HomeComponents.font(Font.PLAIN, 11));
+            s.setForeground(new Color(0xFAD4D4));
+
+            JPanel text = new JPanel();
+            text.setOpaque(false);
+            text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+            text.add(Box.createVerticalGlue());
+            text.add(t);
+            text.add(Box.createVerticalStrut(2));
+            text.add(s);
+            text.add(Box.createVerticalGlue());
+
+            add(plus, BorderLayout.WEST);
+            add(text, BorderLayout.CENTER);
+            add(new JLabel(new HomeComponents.VectorIcon(HomeComponents.VectorIcon.Type.CHEVRON, 16, Color.WHITE)),
+                    BorderLayout.EAST);
+
+            HomeComponents.makeClickable(this, onClick);
+        }
+    }
+
+    /** Concern category tile (icon in a soft circle with a centered label). */
+    public static class CategoryCard extends HomeComponents.RoundedPanel {
+        /** Use '\n' in the label to force a line break. */
+        public CategoryCard(Icon icon, String label, Runnable onClick) {
+            super(14, HomeComponents.CARD, HomeComponents.CARD_BORDER);
+            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            setBorder(BorderFactory.createEmptyBorder(10, 4, 10, 4));
+            setPreferredSize(new Dimension(100, 96));
+
+            HomeComponents.IconTile tile = new HomeComponents.IconTile(40, 40, ICON_CIRCLE, icon);
+            tile.setAlignmentX(CENTER_ALIGNMENT);
+
+            String html = "<html><div style='text-align:center'>"
+                    + label.replace("&", "&amp;").replace("\n", "<br>")
+                    + "</div></html>";
+            JLabel t = new JLabel(html, SwingConstants.CENTER);
+            t.setFont(HomeComponents.font(Font.BOLD, 10));
+            t.setForeground(HomeComponents.TEXT_DARK);
+            t.setAlignmentX(CENTER_ALIGNMENT);
+
+            add(Box.createVerticalGlue());
+            add(tile);
+            add(Box.createVerticalStrut(8));
+            add(t);
+            add(Box.createVerticalGlue());
+
+            HomeComponents.makeClickable(this, onClick);
+            addMouseListener(new MouseAdapter() {
+                @Override public void mouseEntered(MouseEvent e) { setFill(HomeComponents.CARD_HOVER); }
+                @Override public void mouseExited(MouseEvent e)  { setFill(HomeComponents.CARD); }
+            });
+        }
+    }
+
+    /** Small colored status badge such as PENDING. */
+    public static class StatusPill extends HomeComponents.RoundedPanel {
+        public StatusPill(String text, Color fg, Color bg) {
+            super(8, bg, null);
+            setLayout(new FlowLayout(FlowLayout.CENTER, 8, 3));
+            JLabel l = new JLabel(text.toUpperCase());
+            l.setFont(HomeComponents.font(Font.BOLD, 9));
+            l.setForeground(fg);
+            add(l);
+        }
+    }
+
+    /** One row under "Your Active Reports". */
+    public static class ActiveReportCard extends HomeComponents.RoundedPanel {
+        public ActiveReportCard(Icon icon, String title, String reference,
+                                String status, Color statusFg, Color statusBg, Runnable onClick) {
+            super(12, HomeComponents.CARD, HomeComponents.CARD_BORDER);
+            setLayout(new BorderLayout(8, 0));
+            setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 10));
+
+            JLabel t = new JLabel(title);
+            t.setFont(HomeComponents.font(Font.BOLD, 12));
+            t.setForeground(HomeComponents.TEXT_DARK);
+            JLabel r = new JLabel(reference);
+            r.setFont(HomeComponents.font(Font.PLAIN, 10));
+            r.setForeground(HomeComponents.TEXT_MUTED);
+
+            JPanel text = new JPanel();
+            text.setOpaque(false);
+            text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+            text.add(t);
+            text.add(Box.createVerticalStrut(2));
+            text.add(r);
+
+            JPanel pillWrap = new JPanel(new GridBagLayout());
+            pillWrap.setOpaque(false);
+            pillWrap.add(new StatusPill(status, statusFg, statusBg));
+
+            add(new JLabel(icon), BorderLayout.WEST);
+            add(text, BorderLayout.CENTER);
+            add(pillWrap, BorderLayout.EAST);
+
+            HomeComponents.makeClickable(this, onClick);
+        }
+    }
+}
+
+final class TransportComponents {
+
+    private TransportComponents() {}
+
+    public static class TransportIcon implements Icon {
+
+        public enum Type { ARROW_LEFT, USERS, BOX, X_CIRCLE }
+
+        private final Type type;
+        private final int size;
+        private final Color color;
+
+        public TransportIcon(Type type, int size, Color color) {
+            this.type = type;
+            this.size = size;
+            this.color = color;
+        }
+
+        @Override public int getIconWidth() { return size; }
+        @Override public int getIconHeight() { return size; }
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+            g2.translate(x, y);
+            g2.scale(size / 24.0, size / 24.0);
+            g2.setColor(color);
+            g2.setStroke(new BasicStroke(1.8f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+            switch (type) {
+                case ARROW_LEFT:
+                    g2.draw(new Line2D.Double(19, 12, 5, 12));
+                    Path2D head = new Path2D.Double();
+                    head.moveTo(11, 6);
+                    head.lineTo(5, 12);
+                    head.lineTo(11, 18);
+                    g2.draw(head);
+                    break;
+                case USERS:
+                    g2.draw(new Ellipse2D.Double(5, 4.5, 6, 6));
+                    g2.draw(new Arc2D.Double(3, 14, 10, 10, 0, 180, Arc2D.OPEN));
+                    g2.draw(new Ellipse2D.Double(14.5, 6, 5, 5));
+                    g2.draw(new Arc2D.Double(14, 14.5, 8, 8, 0, 180, Arc2D.OPEN));
+                    break;
+                case BOX:
+                    Path2D hex = new Path2D.Double();
+                    hex.moveTo(12, 3);
+                    hex.lineTo(20, 7.5);
+                    hex.lineTo(20, 16.5);
+                    hex.lineTo(12, 21);
+                    hex.lineTo(4, 16.5);
+                    hex.lineTo(4, 7.5);
+                    hex.closePath();
+                    g2.draw(hex);
+                    Path2D inner = new Path2D.Double();
+                    inner.moveTo(4, 7.5);
+                    inner.lineTo(12, 12);
+                    inner.lineTo(20, 7.5);
+                    g2.draw(inner);
+                    g2.draw(new Line2D.Double(12, 12, 12, 21));
+                    break;
+                case X_CIRCLE:
+                    g2.draw(new Ellipse2D.Double(3, 3, 18, 18));
+                    g2.draw(new Line2D.Double(9, 9, 15, 15));
+                    g2.draw(new Line2D.Double(15, 9, 9, 15));
+                    break;
+            }
+            g2.dispose();
+        }
+    }
+
+    public static class BackHeader extends JPanel {
+        public BackHeader(String title, String subtitle, Runnable onBack, Runnable onSos) {
+            setLayout(new BorderLayout(10, 0));
+            setBackground(Color.WHITE);
+            setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createMatteBorder(0, 0, 1, 0, HomeComponents.CARD_BORDER),
+                    BorderFactory.createEmptyBorder(12, 16, 12, 16)));
+
+            HomeComponents.IconTile back = new HomeComponents.IconTile(36, 36, HomeComponents.PRIMARY_SOFT,
+                    new TransportIcon(TransportIcon.Type.ARROW_LEFT, 18, HomeComponents.PRIMARY));
+            HomeComponents.makeClickable(back, onBack);
+
+            JLabel titleLabel = new JLabel(title);
+            titleLabel.setFont(HomeComponents.font(Font.BOLD, 15));
+            titleLabel.setForeground(HomeComponents.TEXT_DARK);
+            JLabel subtitleLabel = new JLabel(subtitle);
+            subtitleLabel.setFont(HomeComponents.font(Font.PLAIN, 11));
+            subtitleLabel.setForeground(HomeComponents.TEXT_MUTED);
+
+            JPanel text = new JPanel();
+            text.setOpaque(false);
+            text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+            text.add(Box.createVerticalGlue());
+            text.add(titleLabel);
+            text.add(subtitleLabel);
+            text.add(Box.createVerticalGlue());
+
+            HomeComponents.RoundedPanel sos = new HomeComponents.RoundedPanel(
+                    999, HomeComponents.PRIMARY_SOFT, HomeComponents.PRIMARY_BORDER);
+            sos.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
+            sos.add(new JLabel(new HomeComponents.VectorIcon(
+                    HomeComponents.VectorIcon.Type.TRUCK, 16, HomeComponents.PRIMARY)));
+            JLabel sosText = new JLabel("SOS");
+            sosText.setFont(HomeComponents.font(Font.BOLD, 12));
+            sosText.setForeground(HomeComponents.PRIMARY);
+            sos.add(sosText);
+            HomeComponents.makeClickable(sos, onSos);
+
+            JPanel sosWrap = new JPanel(new GridBagLayout());
+            sosWrap.setOpaque(false);
+            sosWrap.add(sos);
+            add(back, BorderLayout.WEST);
+            add(text, BorderLayout.CENTER);
+            add(sosWrap, BorderLayout.EAST);
+        }
+    }
+
+    public static class NoticeBanner extends HomeComponents.RoundedPanel {
+        public NoticeBanner(String lead, String message) {
+            super(12, new Color(0xFEF2F2), HomeComponents.PRIMARY_BORDER);
+            setLayout(new BorderLayout(10, 0));
+            setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+
+            JLabel text = new JLabel();
+            text.setFont(HomeComponents.font(Font.PLAIN, 11));
+            text.setForeground(HomeComponents.TEXT_BODY);
+            add(new JLabel(new HomeComponents.VectorIcon(
+                    HomeComponents.VectorIcon.Type.ALERT_TRIANGLE, 18, HomeComponents.PRIMARY_DARK)),
+                    BorderLayout.WEST);
+            add(text, BorderLayout.CENTER);
+
+            Runnable updateTextWidth = () -> {
+                int textWidth = getWidth() > 0
+                        ? Math.max(100, getWidth() - 72)
+                        : HomeComponents.CONTENT_WIDTH - 72;
+                text.setText("<html><body width='" + textWidth + "'>"
+                        + "<font color='#C62828'><b>" + escapeHtml(lead) + "</b></font> "
+                        + escapeHtml(message) + "</body></html>");
+                revalidate();
+            };
+            updateTextWidth.run();
+            addComponentListener(new ComponentAdapter() {
+                @Override public void componentResized(ComponentEvent e) { updateTextWidth.run(); }
+            });
+        }
+    }
+
+    public static class ServiceCard extends HomeComponents.RoundedPanel {
+        public ServiceCard(Icon icon, String title, String description, String action, Runnable onClick) {
+            super(14, HomeComponents.CARD, HomeComponents.CARD_BORDER);
+            setLayout(new BorderLayout(12, 0));
+            setBorder(BorderFactory.createEmptyBorder(14, 14, 14, 12));
+
+            HomeComponents.IconTile tile = new HomeComponents.IconTile(
+                    44, 12, HomeComponents.PRIMARY_SOFT, icon);
+            JLabel titleLabel = new JLabel(title);
+            titleLabel.setFont(HomeComponents.font(Font.BOLD, 13));
+            titleLabel.setForeground(HomeComponents.TEXT_DARK);
+            titleLabel.setAlignmentX(LEFT_ALIGNMENT);
+            JLabel descriptionLabel = new JLabel();
+            descriptionLabel.setFont(HomeComponents.font(Font.PLAIN, 11));
+            descriptionLabel.setForeground(HomeComponents.TEXT_MUTED);
+            descriptionLabel.setAlignmentX(LEFT_ALIGNMENT);
+            RoundedButton actionButton = new RoundedButton(
+                    action + " \u2192", HomeComponents.PRIMARY, Color.WHITE);
+            actionButton.setFont(HomeComponents.font(Font.BOLD, 10));
+            actionButton.setMargin(new Insets(5, 10, 5, 10));
+            actionButton.setAlignmentX(LEFT_ALIGNMENT);
+            actionButton.addActionListener(e -> {
+                if (onClick != null) onClick.run();
+            });
+
+            JPanel text = new JPanel();
+            text.setOpaque(false);
+            text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+            text.add(Box.createVerticalGlue());
+            text.add(titleLabel);
+            text.add(Box.createVerticalStrut(3));
+            text.add(descriptionLabel);
+            text.add(Box.createVerticalStrut(8));
+            text.add(actionButton);
+            text.add(Box.createVerticalGlue());
+
+            add(tile, BorderLayout.WEST);
+            add(text, BorderLayout.CENTER);
+            Runnable updateTextWidth = () -> {
+                int textWidth = getWidth() > 0
+                        ? Math.max(100, getWidth() - 100)
+                        : HomeComponents.CONTENT_WIDTH - 100;
+                titleLabel.setText("<html><body width='" + textWidth + "'>"
+                        + escapeHtml(title) + "</body></html>");
+                descriptionLabel.setText("<html><body width='" + textWidth + "'>"
+                        + escapeHtml(description) + "</body></html>");
+                text.revalidate();
+                revalidate();
+            };
+            updateTextWidth.run();
+            addComponentListener(new ComponentAdapter() {
+                @Override public void componentResized(ComponentEvent e) { updateTextWidth.run(); }
+            });
+            HomeComponents.makeClickable(this, onClick);
+            addMouseListener(new MouseAdapter() {
+                @Override public void mouseEntered(MouseEvent e) { setFill(HomeComponents.CARD_HOVER); }
+                @Override public void mouseExited(MouseEvent e) { setFill(HomeComponents.CARD); }
+            });
+        }
+    }
+
+    private static String escapeHtml(String text) {
+        return text.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+    }
+}
+
+final class DirectoryComponents {
+
+    private DirectoryComponents() {}
+
+    public static final Color OPEN_GREEN = new Color(0x16A34A);
+    public static final Color STAR_AMBER = new Color(0xF59E0B);
+
+    // ------------------------------------------------------------------ icons
+
+    /** Extra icons (24x24 grid) needed by the Directory screen. */
+    public static class DirectoryIcon implements Icon {
+
+        public enum Type { SEARCH, STORE, STAR, MAP_PIN }
+
+        private final Type type;
+        private final int size;
+        private final Color color;
+
+        public DirectoryIcon(Type type, int size, Color color) {
+            this.type = type;
+            this.size = size;
+            this.color = color;
+        }
+
+        @Override public int getIconWidth()  { return size; }
+        @Override public int getIconHeight() { return size; }
+
+        @Override
+        public void paintIcon(Component c, Graphics g, int x, int y) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            g2.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
+            g2.translate(x, y);
+            double s = size / 24.0;
+            g2.scale(s, s);
+            g2.setColor(color);
+            g2.setStroke(new BasicStroke(1.8f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+
+            switch (type) {
+                case SEARCH: {
+                    g2.draw(new Ellipse2D.Double(3.5, 3.5, 12, 12));
+                    g2.draw(new Line2D.Double(13.5, 13.5, 20.5, 20.5));
+                    break;
+                }
+                case STORE: {
+                    Path2D roof = new Path2D.Double();
+                    roof.moveTo(4, 4);
+                    roof.lineTo(20, 4);
+                    roof.lineTo(21, 9);
+                    roof.lineTo(3, 9);
+                    roof.closePath();
+                    g2.draw(roof);
+                    g2.draw(new Line2D.Double(9, 4, 8, 9));
+                    g2.draw(new Line2D.Double(15, 4, 16, 9));
+                    Path2D body = new Path2D.Double();
+                    body.moveTo(5, 9);
+                    body.lineTo(5, 20);
+                    body.lineTo(19, 20);
+                    body.lineTo(19, 9);
+                    g2.draw(body);
+                    g2.draw(new Rectangle2D.Double(10, 14, 4, 6));
+                    break;
+                }
+                case STAR: {
+                    Path2D star = new Path2D.Double();
+                    for (int i = 0; i < 10; i++) {
+                        double r = (i % 2 == 0) ? 10 : 4.2;
+                        double a = Math.toRadians(-90 + i * 36);
+                        double px = 12 + r * Math.cos(a);
+                        double py = 12.8 + r * Math.sin(a);
+                        if (i == 0) star.moveTo(px, py); else star.lineTo(px, py);
+                    }
+                    star.closePath();
+                    g2.fill(star);
+                    g2.draw(star);
+                    break;
+                }
+                case MAP_PIN: {
+                    Path2D pin = new Path2D.Double();
+                    pin.moveTo(12, 21);
+                    pin.curveTo(10, 18, 5, 12.5, 5, 9);
+                    pin.curveTo(5, 5, 8, 2.5, 12, 2.5);
+                    pin.curveTo(16, 2.5, 19, 5, 19, 9);
+                    pin.curveTo(19, 12.5, 14, 18, 12, 21);
+                    pin.closePath();
+                    g2.draw(pin);
+                    g2.draw(new Ellipse2D.Double(10, 7, 4, 4));
+                    break;
+                }
+            }
+            g2.dispose();
+        }
+    }
+
+    // ------------------------------------------------------------- components
+
+    /** Text field that shows a grey hint while it is empty. */
+    public static class HintTextField extends JTextField {
+        private final String hint;
+
+        public HintTextField(String hint) {
+            this.hint = hint;
+            setOpaque(false);
+            setBorder(null);
+            setFont(HomeComponents.font(Font.PLAIN, 12));
+            setForeground(HomeComponents.TEXT_DARK);
+            setCaretColor(HomeComponents.PRIMARY);
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            super.paintComponent(g);
+            if (getText().isEmpty()) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                g2.setColor(HomeComponents.TEXT_MUTED);
+                g2.setFont(getFont());
+                FontMetrics fm = g2.getFontMetrics();
+                Insets in = getInsets();
+                g2.drawString(hint, in.left, (getHeight() - fm.getHeight()) / 2 + fm.getAscent());
+                g2.dispose();
+            }
+        }
+    }
+
+    /** Rounded search box with a magnifier icon; calls onChange on every edit. */
+    public static class SearchBar extends HomeComponents.RoundedPanel {
+        private final HintTextField field;
+
+        public SearchBar(String hint, Consumer<String> onChange) {
+            super(14, HomeComponents.CARD, HomeComponents.CARD_BORDER);
+            setLayout(new BorderLayout(8, 0));
+            setBorder(BorderFactory.createEmptyBorder(10, 12, 10, 12));
+
+            field = new HintTextField(hint);
+            field.getDocument().addDocumentListener(new DocumentListener() {
+                private void changed() { if (onChange != null) onChange.accept(field.getText()); }
+                @Override public void insertUpdate(DocumentEvent e)  { changed(); }
+                @Override public void removeUpdate(DocumentEvent e)  { changed(); }
+                @Override public void changedUpdate(DocumentEvent e) { changed(); }
+            });
+
+            add(new JLabel(new DirectoryIcon(DirectoryIcon.Type.SEARCH, 16, HomeComponents.TEXT_MUTED)),
+                    BorderLayout.WEST);
+            add(field, BorderLayout.CENTER);
+        }
+    }
+
+    /** Row of pill-shaped category filters; one is selected at a time. */
+    public static class FilterChips extends JPanel {
+        private final Chip[] chips;
+
+        public FilterChips(String[] labels, String selected, Consumer<String> onSelect) {
+            super(new FlowLayout(FlowLayout.LEFT, 6, 8));
+            setOpaque(false);
+
+            chips = new Chip[labels.length];
+            for (int i = 0; i < labels.length; i++) {
+                final Chip chip = new Chip(labels[i]);
+                chips[i] = chip;
+                add(chip);
+                HomeComponents.makeClickable(chip, () -> {
+                    select(chip.label);
+                    if (onSelect != null) onSelect.accept(chip.label);
+                });
+            }
+            select(selected);
+        }
+
+        public void select(String label) {
+            for (Chip c : chips) c.setSelected(c.label.equals(label));
+        }
+
+        private static class Chip extends JPanel {
+            final String label;
+            private final JLabel text;
+            private boolean selected;
+
+            Chip(String label) {
+                this.label = label;
+                setOpaque(false);
+                setLayout(new BorderLayout());
+                setBorder(BorderFactory.createEmptyBorder(5, 11, 5, 11));
+                text = new JLabel(label);
+                text.setFont(HomeComponents.font(Font.PLAIN, 11));
+                add(text, BorderLayout.CENTER);
+            }
+
+            void setSelected(boolean selected) {
+                this.selected = selected;
+                text.setForeground(selected ? Color.WHITE : HomeComponents.TEXT_BODY);
+                repaint();
+            }
+
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int w = getWidth(), h = getHeight();
+                g2.setColor(selected ? HomeComponents.PRIMARY : HomeComponents.CARD);
+                g2.fill(new RoundRectangle2D.Double(0, 0, w - 1, h - 1, h, h));
+                g2.setColor(selected ? HomeComponents.PRIMARY : HomeComponents.CARD_BORDER);
+                g2.setStroke(new BasicStroke(1f));
+                g2.draw(new RoundRectangle2D.Double(0.5, 0.5, w - 2, h - 2, h, h));
+                g2.dispose();
+                super.paintComponent(g);
+            }
+        }
+    }
+
+    /** Business row: store icon, name, category + open status, address and rating. */
+    public static class BusinessCard extends HomeComponents.RoundedPanel {
+        public BusinessCard(String name, String type, boolean open, String address,
+                            double rating, Runnable onClick) {
+            super(14, HomeComponents.CARD, HomeComponents.CARD_BORDER);
+            setLayout(new BorderLayout(10, 0));
+            setBorder(BorderFactory.createEmptyBorder(12, 12, 12, 12));
+
+            HomeComponents.IconTile tile = new HomeComponents.IconTile(40, 12, HomeComponents.PRIMARY_SOFT,
+                    new DirectoryIcon(DirectoryIcon.Type.STORE, 22, HomeComponents.PRIMARY));
+
+            JLabel nameLabel = new JLabel(name);
+            nameLabel.setFont(HomeComponents.font(Font.BOLD, 12).deriveFont(11.5f));
+            nameLabel.setForeground(HomeComponents.TEXT_DARK);
+            nameLabel.setAlignmentX(LEFT_ALIGNMENT);
+
+            String status = open
+                    ? "<font color='#16A34A'><b>Open Now</b></font>"
+                    : "<b>Closed</b>";
+            JLabel statusLabel = new JLabel("<html>" + type.replace("&", "&amp;")
+                    + " \u00B7 " + status + "</html>");
+            statusLabel.setFont(HomeComponents.font(Font.PLAIN, 10));
+            statusLabel.setForeground(HomeComponents.TEXT_BODY);
+            statusLabel.setAlignmentX(LEFT_ALIGNMENT);
+
+            JLabel addressLabel = new JLabel(address);
+            addressLabel.setFont(HomeComponents.font(Font.PLAIN, 10));
+            addressLabel.setForeground(HomeComponents.TEXT_MUTED);
+            addressLabel.setAlignmentX(LEFT_ALIGNMENT);
+
+            JPanel locationLink = new JPanel(new FlowLayout(FlowLayout.LEFT, 4, 0));
+            locationLink.setOpaque(false);
+            locationLink.setAlignmentX(LEFT_ALIGNMENT);
+            locationLink.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            JLabel pin = new JLabel(new DirectoryIcon(DirectoryIcon.Type.MAP_PIN, 12, HomeComponents.PRIMARY));
+            pin.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            locationLink.add(pin);
+            JLabel locationText = new JLabel("<html>View location</html>");
+            locationText.setFont(HomeComponents.font(Font.BOLD, 10));
+            locationText.setForeground(HomeComponents.PRIMARY);
+            locationText.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+            locationLink.add(locationText);
+            MouseAdapter openLocation = new MouseAdapter() {
+                @Override public void mouseClicked(MouseEvent e) {
+                    if (onClick != null) onClick.run();
+                }
+            };
+            locationLink.addMouseListener(openLocation);
+            pin.addMouseListener(openLocation);
+            locationText.addMouseListener(openLocation);
+
+            JPanel text = new JPanel();
+            text.setOpaque(false);
+            text.setLayout(new BoxLayout(text, BoxLayout.Y_AXIS));
+            text.add(nameLabel);
+            text.add(Box.createVerticalStrut(3));
+            text.add(statusLabel);
+            text.add(Box.createVerticalStrut(1));
+            text.add(addressLabel);
+            text.add(Box.createVerticalStrut(4));
+            text.add(locationLink);
+
+            JPanel rate = new JPanel(new FlowLayout(FlowLayout.RIGHT, 3, 0));
+            rate.setOpaque(false);
+            rate.add(new JLabel(new DirectoryIcon(DirectoryIcon.Type.STAR, 12, STAR_AMBER)));
+            JLabel ratingLabel = new JLabel(String.format(Locale.US, "%.1f", rating));
+            ratingLabel.setFont(HomeComponents.font(Font.BOLD, 11));
+            ratingLabel.setForeground(HomeComponents.TEXT_DARK);
+            rate.add(ratingLabel);
+
+            JPanel rateWrap = new JPanel(new BorderLayout());
+            rateWrap.setOpaque(false);
+            rateWrap.add(rate, BorderLayout.NORTH);
+
+            add(tile, BorderLayout.WEST);
+            add(text, BorderLayout.CENTER);
+            add(rateWrap, BorderLayout.EAST);
+
+            HomeComponents.makeClickable(this, onClick);
+        }
+    }
+
+    /**
+     * Vertical list whose maximum height follows its current content,
+     * so it can be rebuilt (filtered) without leaving a stale size behind.
+     */
+    public static class ListPanel extends JPanel {
+        public ListPanel() {
+            setOpaque(false);
+            setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            setAlignmentX(LEFT_ALIGNMENT);
+        }
+
+        @Override
+        public Dimension getMaximumSize() {
+            return new Dimension(Integer.MAX_VALUE, getPreferredSize().height);
+        }
     }
 }
