@@ -48,9 +48,10 @@ public class RegisterScreen3 extends JFrame {
         int sectionX = (W - 270) / 2;
 
         // Title + subtitle
-        ShadowLabel title = new ShadowLabel("Resident Registration", RegistrationTheme.RED);
+        JLabel title = new JLabel("Resident Registration");
         title.setFont(RegistrationTheme.font(Font.BOLD, 22f));
-        title.setBounds(fieldX - 8, 88, 267, 44);
+        title.setForeground(RegistrationTheme.RED);
+        title.setBounds(fieldX, 88, 267, 32);
         root.add(title);
 
         JLabel subtitle = new JLabel("Create your account to access barangay e-services");
@@ -135,7 +136,7 @@ public class RegisterScreen3 extends JFrame {
 
     /** Password input: lock icon on the left, show/hide eye on the right. */
     private RegistrationFieldBox passwordBox(RegistrationPasswordField pf) {
-        RegistrationFieldBox box = new RegistrationFieldBox(pf, 10, 36,
+        RegistrationFieldBox box = new RegistrationFieldBox(pf, 30, 36,
                 RegistrationFieldBox.Deco.LOCK, RegistrationTheme.NAVY);
         RegistrationEyeButton eye = new RegistrationEyeButton();
         eye.setBounds(267 - 32, 2, 24, 22);
