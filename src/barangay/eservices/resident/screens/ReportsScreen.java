@@ -14,10 +14,14 @@ import java.util.List;
 
 class ReportsScreen extends ScrollableScreen {
     @Override protected String getHeaderTitle()    { return "Barangay Reports"; }
+    @Override protected boolean hasHeader()        { return false; }
+    @Override protected JComponent getFixedHeader() {
+        return new HomeComponents.HeaderBar("Barangay Reports", "Central Signal, Taguig");
+    }
     @Override protected AppSection createContent() { return new ReportsContent(); }
 }
 
-class ReportsContent extends AppSection {
+class ReportsContent extends AppSection implements Scrollable {
     private final List<ConcernCategory> categories = ReportsData.getCategories();
     private final List<ActiveReport> reports = new ArrayList<>(ReportsData.getActiveReports());
     private final JPanel reportList = new JPanel();
@@ -25,50 +29,70 @@ class ReportsContent extends AppSection {
 
     @Override
     protected void buildUI() {
-        setLayout(new BorderLayout());
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(Theme.BG);
-
-        JPanel content = new JPanel();
-        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-        content.setBackground(Theme.BG);
-        content.setBorder(new EmptyBorder(16, 16, 16, 16));
+        setBorder(new EmptyBorder(16, 16, 32, 16));
 
         JLabel heading = new JLabel("Help Us Improve Our Community");
         heading.setFont(Theme.bold(19));
         heading.setForeground(Theme.TEXT);
 
-        JLabel desc = new JLabel("<html><body width='310'>File municipal and community concerns directly "
+        JLabel desc = new JLabel("<html><body width='280'>File municipal and community concerns directly "
                 + "to Barangay Central Signal officers. We prioritize resolution for public safety.</body></html>");
         desc.setFont(Theme.regular(12));
         desc.setForeground(Theme.TEXT_SUB);
 
-        content.add(heading);
-        content.add(Box.createVerticalStrut(6));
-        content.add(desc);
-        content.add(Box.createVerticalStrut(16));
-        content.add(new SubmitBanner(() -> openForm(null)));
-        content.add(Box.createVerticalStrut(18));
-        content.add(sectionTitle("Select Concern Category"));
-        content.add(Box.createVerticalStrut(10));
+        addFullWidth(heading);
+        add(Box.createVerticalStrut(6));
+        addFullWidth(desc);
+        add(Box.createVerticalStrut(16));
+        addFullWidth(new SubmitBanner(() -> openForm(null)));
+        add(Box.createVerticalStrut(18));
+        addFullWidth(sectionTitle("Select Concern Category"));
+        add(Box.createVerticalStrut(10));
 
         JPanel grid = new JPanel(new GridLayout(2, 3, 10, 10));
         grid.setOpaque(false);
         for (ConcernCategory c : categories) grid.add(new CategoryCard(c, name -> openForm(name)));
-        grid.setPreferredSize(new Dimension(358, 178));
+        grid.setPreferredSize(new Dimension(0, 178));
+        grid.setMinimumSize(new Dimension(0, 178));
         grid.setMaximumSize(new Dimension(Integer.MAX_VALUE, 178));
-        content.add(grid);
+        addFullWidth(grid);
 
-        content.add(Box.createVerticalStrut(18));
-        content.add(sectionTitle("Your Active Reports"));
-        content.add(Box.createVerticalStrut(10));
+        add(Box.createVerticalStrut(18));
+        addFullWidth(sectionTitle("Your Active Reports"));
+        add(Box.createVerticalStrut(10));
         reportList.setOpaque(false);
         reportList.setLayout(new BoxLayout(reportList, BoxLayout.Y_AXIS));
-        content.add(reportList);
         refreshReports();
+        addFlexibleHeight(reportList);
 
-        for (Component c : content.getComponents()) ((JComponent) c).setAlignmentX(LEFT_ALIGNMENT);
-        add(content, BorderLayout.NORTH);
+        add(Box.createVerticalStrut(16));
     }
+
+    private void addFullWidth(JComponent component) {
+        component.setAlignmentX(LEFT_ALIGNMENT);
+        Dimension preferred = component.getPreferredSize();
+        component.setMinimumSize(new Dimension(0, preferred.height));
+        component.setMaximumSize(new Dimension(Integer.MAX_VALUE, preferred.height));
+        add(component);
+    }
+
+    private void addFlexibleHeight(JComponent component) {
+        component.setAlignmentX(LEFT_ALIGNMENT);
+        Dimension preferred = component.getPreferredSize();
+        component.setMinimumSize(new Dimension(0, preferred.height));
+        component.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
+        add(component);
+    }
+
+    @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }
+    @Override public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) { return 16; }
+    @Override public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+        return visibleRect.height;
+    }
+    @Override public boolean getScrollableTracksViewportWidth() { return true; }
+    @Override public boolean getScrollableTracksViewportHeight() { return false; }
 
     /** Opens the report form; when submitted, the new report is added to "Your Active Reports". */
     private void openForm(String preselectedCategory) {
@@ -124,7 +148,8 @@ class SubmitBanner extends RoundedPanel {
         RoundedPanel circle = new RoundedPanel(Theme.RED_DARK, null, 32);
         circle.setLayout(new GridBagLayout());
         circle.setPreferredSize(new Dimension(32, 32));
-        circle.add(new IconLabel(IconType.PLUS, 14, Color.WHITE));
+        circle.add(new JLabel(new ReportsComponents.ReportIcon(
+                ReportsComponents.ReportIcon.Type.PLUS, 14, Color.WHITE)));
 
         JLabel title = new JLabel("Submit a New Report");
         title.setFont(Theme.bold(13));
@@ -172,7 +197,7 @@ class CategoryCard extends RoundedPanel {
         RoundedPanel circle = new RoundedPanel(new Color(0xFD, 0xEE, 0xEE), null, 36);
         circle.setLayout(new GridBagLayout());
         circle.setPreferredSize(new Dimension(36, 36));
-        circle.add(new IconLabel(category.getIcon(), 16, Theme.RED));
+        circle.add(new JLabel(ReportsScreenIcons.create(category.getIcon(), 16, Theme.RED)));
 
         JLabel name = new JLabel("<html><body width='72'><center>" + category.getName() + "</center></body></html>",
                 SwingConstants.CENTER);
@@ -224,13 +249,41 @@ class ReportCard extends RoundedPanel {
         textWrap.add(texts, gc);
 
         ReportStatus st = report.getStatus();
-        add(Theme.wrap(new IconLabel(report.getIcon(), 15, Theme.RED)), BorderLayout.WEST);
+        add(Theme.wrap(new JLabel(ReportsScreenIcons.create(report.getIcon(), 15, Theme.RED))), BorderLayout.WEST);
         add(textWrap, BorderLayout.CENTER);
         add(Theme.wrap(new Badge(st.getLabel(), st.getBg(), st.getFg(), null, 8)), BorderLayout.EAST);
 
         addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) { ReportDetailsDialog.show(ReportCard.this, report); }
         });
+    }
+}
+
+final class ReportsScreenIcons {
+    private ReportsScreenIcons() {}
+
+    static Icon create(IconType type, int size, Color color) {
+        ReportsComponents.ReportIcon.Type reportType = switch (type) {
+            case BULB, LIGHT -> ReportsComponents.ReportIcon.Type.STREETLIGHT_OFF;
+            case TRASH -> ReportsComponents.ReportIcon.Type.TRASH;
+            case GAVEL -> ReportsComponents.ReportIcon.Type.GAVEL;
+            case WARNING -> ReportsComponents.ReportIcon.Type.TREE;
+            default -> null;
+        };
+        if (reportType != null) {
+            return new ReportsComponents.ReportIcon(reportType, size, color);
+        }
+
+        return new Icon() {
+            @Override public int getIconWidth() { return size; }
+            @Override public int getIconHeight() { return size; }
+            @Override
+            public void paintIcon(Component component, Graphics graphics, int x, int y) {
+                Graphics2D iconGraphics = (Graphics2D) graphics.create(x, y, size, size);
+                type.draw(iconGraphics, size, color);
+                iconGraphics.dispose();
+            }
+        };
     }
 }
 
@@ -475,8 +528,8 @@ class ReportsData {
         List<ConcernCategory> list = new ArrayList<>();
         list.add(new ConcernCategory("Broken Streetlight", IconType.BULB));
         list.add(new ConcernCategory("Uncollected Garbage", IconType.TRASH));
-        list.add(new ConcernCategory("Pothole Concerns", IconType.WARNING));
-        list.add(new ConcernCategory("Tree Trimming", IconType.TRIANGLE));
+        list.add(new ConcernCategory("Pothole Concerns", IconType.TRIANGLE));
+        list.add(new ConcernCategory("Tree Trimming", IconType.WARNING));
         list.add(new ConcernCategory("Blotters & Records", IconType.DOC));
         list.add(new ConcernCategory("Civic Complaints", IconType.GAVEL));
         return list;
