@@ -20,19 +20,6 @@ import java.util.concurrent.Executors;
 import java.util.ArrayList;
 import java.util.List;
 
-class Official {
-    private final String name;
-    private final String position;
-
-    Official(String name, String position) {
-        this.name = name;
-        this.position = position;
-    }
-
-    public String getName()     { return name; }
-    public String getPosition() { return position; }
-}
-
 class GuideScreen extends ScrollableScreen {
     @Override protected String getHeaderTitle()    { return "Citizen Guide"; }
     @Override protected AppSection createContent() { return new GuideContent(GuideData.getOfficials()); }
