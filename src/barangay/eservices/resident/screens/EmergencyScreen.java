@@ -10,54 +10,6 @@ import java.awt.geom.*;
 import java.util.ArrayList;
 import java.util.List;
 
-enum HotlineStyle {
-    //          card background           title            subtitle                      tagline                       icon bg                         icon fg                       CALL bg    CALL fg
-    FEATURED(new Color(0, 0, 0, 0),       Color.WHITE,     new Color(0xF3, 0xB8, 0xB8),  Color.WHITE,                  new Color(0xA3, 0x2B, 0x2B),    new Color(0xFF, 0xE4, 0xE4),  Color.WHITE, Theme.RED),
-    STANDARD(Color.WHITE,                 Theme.TEXT,      Theme.TEXT_SUB,               Theme.RED,                    Theme.RED_SOFT,                 Theme.RED,                    Theme.RED,   Color.WHITE);
-
-    private final Color cardBg, title, subtitle, tagline, iconBg, iconFg, callBg, callFg;
-
-    HotlineStyle(Color cardBg, Color title, Color subtitle, Color tagline,
-                 Color iconBg, Color iconFg, Color callBg, Color callFg) {
-        this.cardBg = cardBg;
-        this.title = title;
-        this.subtitle = subtitle;
-        this.tagline = tagline;
-        this.iconBg = iconBg;
-        this.iconFg = iconFg;
-        this.callBg = callBg;
-        this.callFg = callFg;
-    }
-
-    public Color getCardBg()   { return cardBg; }
-    public Color getTitle()    { return title; }
-    public Color getSubtitle() { return subtitle; }
-    public Color getTagline()  { return tagline; }
-    public Color getIconBg()   { return iconBg; }
-    public Color getIconFg()   { return iconFg; }
-    public Color getCallBg()   { return callBg; }
-    public Color getCallFg()   { return callFg; }
-}
-
-class Hotline {
-    private final String name;
-    private final String agency;
-    private final String tagline;
-    private final HotlineStyle style;
-
-    Hotline(String name, String agency, String tagline, HotlineStyle style) {
-        this.name = name;
-        this.agency = agency;
-        this.tagline = tagline;
-        this.style = style;
-    }
-
-    public String getName()          { return name; }
-    public String getAgency()        { return agency; }
-    public String getTagline()       { return tagline; }
-    public HotlineStyle getStyle()   { return style; }
-}
-
 class EmergencyScreen extends ScrollableScreen {
     private final NavListener nav;
     EmergencyScreen(NavListener nav) { this.nav = nav; }
