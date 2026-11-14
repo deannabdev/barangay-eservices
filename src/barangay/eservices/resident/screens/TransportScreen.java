@@ -24,114 +24,86 @@ class TransportScreen extends ScrollableScreen {
     TransportScreen(NavListener nav) { this.nav = nav; }
 
     @Override protected String getHeaderTitle()    { return "Barangay Transport"; }
-    @Override protected Runnable getBackAction()   { return () -> nav.onNavigate("Home"); }
+    @Override protected boolean hasHeader()        { return false; }
+    @Override protected JComponent getFixedHeader() {
+        return new HomeComponents.HeaderBar(
+                "Barangay Transport", "Central Signal, Taguig", () -> nav.onNavigate("Home"));
+    }
     @Override protected AppSection createContent() { return new TransportContent(TransportData.getTransportServices()); }
 }
 
-class TransportContent extends AppSection {
+class TransportContent extends AppSection implements Scrollable {
     private final List<TransportService> services;
 
     TransportContent(List<TransportService> services) { this.services = services; }
 
     @Override
     protected void buildUI() {
-        setLayout(new BorderLayout());
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         setBackground(Theme.BG);
-
-        JPanel content = new JPanel();
-        content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
-        content.setBackground(Theme.BG);
-        content.setBorder(new EmptyBorder(16, 16, 16, 16));
+        setBorder(new EmptyBorder(16, 16, 32, 16));
 
         JLabel heading = new JLabel("Utility Vehicle Requests");
         heading.setFont(Theme.bold(19));
         heading.setForeground(Theme.TEXT);
 
-        JLabel desc = new JLabel("<html><body width='310'>Request valid non-emergency transport services "
+        JLabel desc = new JLabel("<html><body width='" + (HomeComponents.CONTENT_WIDTH - 24)
+                + "'>Request valid non-emergency transport services "
                 + "offered by Barangay Central Signal. Please request at least 2 days prior to schedule.</body></html>");
         desc.setFont(Theme.regular(12));
         desc.setForeground(Theme.TEXT_SUB);
 
-        content.add(heading);
-        content.add(Box.createVerticalStrut(6));
-        content.add(desc);
-        content.add(Box.createVerticalStrut(14));
+        addFullWidth(heading);
+        add(Box.createVerticalStrut(6));
+        addFullWidth(desc);
+        add(Box.createVerticalStrut(14));
 
-        // IMPORTANT notice
-        RoundedPanel warn = new RoundedPanel(new Color(0xFE, 0xEC, 0xEC), new Color(0xF3, 0xA6, 0xA6), 10);
-        warn.setLayout(new FlowLayout(FlowLayout.LEFT, 8, 0));
-        warn.setBorder(new EmptyBorder(10, 10, 10, 10));
-        warn.add(new IconLabel(IconType.WARNING, 14, Theme.RED));
-        JLabel wl = new JLabel("<html><body width='285'><b>IMPORTANT:</b> This is purely for non-emergency "
-                + "utility use. For urgent or life-threatening medical emergencies, please tap the SOS button or use "
-                + "the Emergency Hotline.</body></html>");
-        wl.setFont(Theme.regular(10));
-        wl.setForeground(new Color(0xB9, 0x1C, 0x1C));
-        warn.add(wl);
-        content.add(warn);
-        content.add(Box.createVerticalStrut(14));
+        addFullWidth(new TransportComponents.NoticeBanner("IMPORTANT:",
+                "This is purely for non-emergency utility use. For urgent or life-threatening medical "
+                        + "emergencies, please tap the SOS button or use the Emergency Hotline."));
+        add(Box.createVerticalStrut(14));
 
         for (TransportService t : services) {
-            content.add(new TransportCard(t));
-            content.add(Box.createVerticalStrut(12));
+            addFullWidth(new TransportComponents.ServiceCard(
+                    serviceIcon(t.getIcon(), 22, Theme.RED),
+                    t.getTitle(),
+                    t.getDescription(),
+                    "File Travel Request",
+                    () -> new TravelRequestDialog(t).show(this)));
+            add(Box.createVerticalStrut(12));
         }
-
-        for (Component c : content.getComponents()) ((JComponent) c).setAlignmentX(LEFT_ALIGNMENT);
-        add(content, BorderLayout.NORTH);
     }
-}
 
-class TransportCard extends RoundedPanel {
-    private final TransportService service;
+    private void addFullWidth(JComponent component) {
+        component.setAlignmentX(LEFT_ALIGNMENT);
+        Dimension preferred = component.getPreferredSize();
+        component.setMinimumSize(new Dimension(0, preferred.height));
+        component.setMaximumSize(new Dimension(Integer.MAX_VALUE, preferred.height));
+        add(component);
+    }
 
-    TransportCard(TransportService service) {
-        super(Color.WHITE, Theme.BORDER, 16);
-        this.service = service;
-        setLayout(new BorderLayout(12, 0));
-        setBorder(new EmptyBorder(14, 12, 14, 12));
+    private static Icon serviceIcon(IconType type, int size, Color color) {
+        return new Icon() {
+            @Override public int getIconWidth() { return size; }
+            @Override public int getIconHeight() { return size; }
 
-        RoundedPanel box = new RoundedPanel(Theme.RED_SOFT, null, 10);
-        box.setLayout(new GridBagLayout());
-        box.setPreferredSize(new Dimension(34, 34));
-        box.add(new IconLabel(service.getIcon(), 17, Theme.RED));
-        JPanel boxWrap = new JPanel(new GridBagLayout());
-        boxWrap.setOpaque(false);
-        GridBagConstraints top = new GridBagConstraints();
-        top.anchor = GridBagConstraints.NORTH;
-        top.weighty = 1;
-        boxWrap.add(box, top);
-
-        JLabel title = new JLabel(service.getTitle());
-        title.setFont(Theme.bold(12));
-        title.setForeground(Theme.TEXT);
-
-        JLabel desc = new JLabel("<html><body width='245'>" + service.getDescription() + "</body></html>");
-        desc.setFont(Theme.regular(10));
-        desc.setForeground(Theme.TEXT_SUB);
-
-        JLabel link = new JLabel("File Travel Request \u2192");
-        link.setFont(Theme.bold(10));
-        link.setForeground(Theme.RED);
-        link.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        link.addMouseListener(new MouseAdapter() {
-            @Override public void mouseClicked(MouseEvent e) {
-                new TravelRequestDialog(TransportCard.this.service).show(TransportCard.this);
+            @Override
+            public void paintIcon(Component component, Graphics graphics, int x, int y) {
+                Graphics2D g2 = (Graphics2D) graphics.create(x, y, size, size);
+                Theme.smooth(g2);
+                type.draw(g2, size, color);
+                g2.dispose();
             }
-        });
-
-        JPanel texts = new JPanel();
-        texts.setOpaque(false);
-        texts.setLayout(new BoxLayout(texts, BoxLayout.Y_AXIS));
-        texts.add(title);
-        texts.add(Box.createVerticalStrut(3));
-        texts.add(desc);
-        texts.add(Box.createVerticalStrut(6));
-        texts.add(link);
-        for (Component c : texts.getComponents()) ((JComponent) c).setAlignmentX(LEFT_ALIGNMENT);
-
-        add(boxWrap, BorderLayout.WEST);
-        add(texts, BorderLayout.CENTER);
+        };
     }
+
+    @Override public Dimension getPreferredScrollableViewportSize() { return getPreferredSize(); }
+    @Override public int getScrollableUnitIncrement(Rectangle visibleRect, int orientation, int direction) { return 16; }
+    @Override public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
+        return visibleRect.height;
+    }
+    @Override public boolean getScrollableTracksViewportWidth() { return true; }
+    @Override public boolean getScrollableTracksViewportHeight() { return false; }
 }
 
 class TravelRequest {
