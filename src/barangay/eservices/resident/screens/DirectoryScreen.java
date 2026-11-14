@@ -10,55 +10,6 @@ import java.awt.geom.*;
 import java.util.ArrayList;
 import java.util.List;
 
-enum BusinessType {
-    FOOD("Food"), PHARMACY("Pharmacy"), RETAIL("Retail"), HARDWARE("Hardware");
-
-    private final String label;
-    BusinessType(String label) { this.label = label; }
-    public String getLabel() { return label; }
-}
-
-class Business {
-    private final String name;
-    private final BusinessType type;
-    private final String category;
-    private final boolean open;
-    private final String address;
-    private final double rating;
-    private final double latitude;
-    private final double longitude;
-
-    Business(String name, BusinessType type, String category, boolean open, String address, double rating,
-             double latitude, double longitude) {
-        this.name = name;
-        this.type = type;
-        this.category = category;
-        this.open = open;
-        this.address = address;
-        this.rating = rating;
-        this.latitude = latitude;
-        this.longitude = longitude;
-    }
-
-    public String getName()         { return name; }
-    public BusinessType getType()   { return type; }
-    public String getCategory()     { return category; }
-    public boolean isOpen()         { return open; }
-    public String getAddress()      { return address; }
-    public double getRating()       { return rating; }
-    public double getLatitude()     { return latitude; }
-    public double getLongitude()    { return longitude; }
-
-    /** Used by the search bar + filter chips. type == null means "All". */
-    public boolean matches(String query, BusinessType filter) {
-        if (filter != null && filter != type) return false;
-        String q = query == null ? "" : query.trim().toLowerCase();
-        if (q.isEmpty()) return true;
-        return name.toLowerCase().contains(q) || category.toLowerCase().contains(q)
-                || address.toLowerCase().contains(q) || type.getLabel().toLowerCase().contains(q);
-    }
-}
-
 class DirectoryScreen extends ScrollableScreen {
     @Override protected String getHeaderTitle()    { return "Barangay Directory"; }
     @Override protected AppSection createContent() { return new DirectoryContent(DirectoryData.getBusinesses()); }
