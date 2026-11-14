@@ -21,22 +21,6 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-class TransportService {
-    private final String title;
-    private final String description;
-    private final IconType icon;
-
-    TransportService(String title, String description, IconType icon) {
-        this.title = title;
-        this.description = description;
-        this.icon = icon;
-    }
-
-    public String getTitle()       { return title; }
-    public String getDescription() { return description; }
-    public IconType getIcon()      { return icon; }
-}
-
 class TransportScreen extends ScrollableScreen {
     private final NavListener nav;
     TransportScreen(NavListener nav) { this.nav = nav; }
