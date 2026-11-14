@@ -2,7 +2,7 @@ package barangay.eservices;
 import javax.swing.*;
 import java.awt.*;
 
-public class ProfileScreen extends JFrame {
+public class ProfileScreen extends ProfileScreenBackgroundPanel {
 
     private static final int W = 351, H = 775;
     private static final int M = 29, CW = W - 2 * M;   // side margin and card width
@@ -10,21 +10,38 @@ public class ProfileScreen extends JFrame {
     // ---- User data shown on the screen (call setUser to change) ----
     private final JLabel nameLabel    = new JLabel("Your Name", SwingConstants.CENTER);
     private final JLabel contactLabel = new JLabel("", SwingConstants.CENTER);
+    private final Navigator navigator;
 
     public ProfileScreen() {
-        super("Account Profile");
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setResizable(false);
+        this(null);
+    }
 
-        ProfileScreenBackgroundPanel root = new ProfileScreenBackgroundPanel();
-        root.setLayout(null);
-        root.setPreferredSize(new Dimension(W, H));
-        buildUI(root);
+    ProfileScreen(Navigator navigator) {
+        this.navigator = navigator;
+        setLayout(null);
+        setPreferredSize(new Dimension(W, navigator == null ? H : H - 86));
+        buildUI(this);
         setUser("Juan Dela Cruz", "juandelacruz@gmail.com", "09123456789");
+    }
 
-        setContentPane(root);
-        pack();
-        setLocationRelativeTo(null);
+    private void openWindow() {
+        JFrame window = new JFrame("Account Profile");
+        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        window.setResizable(false);
+        window.setContentPane(this);
+        window.pack();
+        window.setLocationRelativeTo(null);
+        window.setVisible(true);
+    }
+
+    public static void showWindow(String name, String email, String phone) {
+        ProfileScreen profile = new ProfileScreen();
+        profile.setUser(name, email, phone);
+        profile.openWindow();
+    }
+
+    public static void showWindow() {
+        new ProfileScreen().openWindow();
     }
 
     /** Updates the name, email and phone shown in the profile card. */
@@ -63,12 +80,18 @@ public class ProfileScreen extends JFrame {
 
         // Menu rows
         ProfileMenuRow edit = new ProfileMenuRow("Edit profile information", ProfileMenuRow.Icon.NEWS, 42,
-                () -> { new ProfileInfo().setVisible(true); dispose(); });
+                () -> {
+                    closeWindow();
+                    new ProfileInfo().setVisible(true);
+                });
         edit.setBounds(M, 383, CW, 46);
         root.add(edit);
 
         ProfileMenuRow security = new ProfileMenuRow("Security & Log In", ProfileMenuRow.Icon.NEWS, 42,
-                () -> { new Security().setVisible(true); dispose(); });
+                () -> {
+                    closeWindow();
+                    new Security().setVisible(true);
+                });
         security.setBounds(M, 435, CW, 46);
         root.add(security);
 
@@ -96,26 +119,36 @@ public class ProfileScreen extends JFrame {
         }
 
         // Bottom navigation
-        ProfileNavBar nav = new ProfileNavBar(4, this::navigate);
-        nav.setBounds(0, 689, W, H - 689);
-        root.add(nav);
+        if (navigator == null) {
+            ProfileNavBar nav = new ProfileNavBar(4, this::navigate);
+            nav.setBounds(0, 689, W, H - 689);
+            root.add(nav);
+        }
     }
 
     private void navigate(int index) {
-        // 0 Home, 1 E-Services, 2 Reports, 3 Guide, 4 Profile (this screen)
-        if (index == 4) return;
-        String[] names = {"Home", "E-Services", "Reports", "Guide"};
-        // TODO: open the matching screen here and dispose() this one.
-        comingSoon(names[index]);
+        String[] names = {"Home", "E-Services", "Reports", "Guide", "Profile"};
+        String screen = names[index];
+        if (navigator != null) {
+            navigator.onNavigate(screen);
+        } else if (index != 4) {
+            closeWindow();
+            new HomeWindow(screen).setVisible(true);
+        }
     }
 
     private void logOut() {
         int answer = JOptionPane.showConfirmDialog(this, "Are you sure you want to log out?",
                 "Log Out", JOptionPane.YES_NO_OPTION);
         if (answer == JOptionPane.YES_OPTION) {
+            closeWindow();
             new LoginScreen().setVisible(true);
-            dispose();
         }
+    }
+
+    private void closeWindow() {
+        Window window = SwingUtilities.getWindowAncestor(this);
+        if (window != null) window.dispose();
     }
 
     private void comingSoon(String what) {
