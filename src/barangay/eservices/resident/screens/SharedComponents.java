@@ -1,3 +1,4 @@
+package barangay.eservices;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -404,6 +405,12 @@ class DataRepository {
 interface Fee {
     String getDescription();
     boolean isFree();
+
+    default Badge createTag() {
+        Color background = isFree() ? Theme.GREEN_SOFT : Theme.RED_SOFT;
+        Color foreground = isFree() ? Theme.GREEN : Theme.RED;
+        return new Badge(getDescription(), background, foreground, 8);
+    }
 }
 
 class PaidFee implements Fee {
@@ -581,12 +588,325 @@ enum IconType {
                           new int[]{size / 6, size * 5 / 6, size * 5 / 6}, 3);
             g.fillRect(size / 2 - size / 12, size / 3 - size / 12, size / 6, size / 6);
         }
+    },
+    MAGNIFIER {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            drawSearch(g, size, color);
+        }
+    },
+    SEARCH {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            drawSearch(g, size, color);
+        }
+    },
+    STORE {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            SHOP.draw(g, size, color);
+        }
+    },
+    STAR {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            int cx = size / 2, cy = size / 2;
+            int outer = size * 2 / 5, inner = outer * 2 / 5;
+            int[] x = new int[10], y = new int[10];
+            for (int i = 0; i < 10; i++) {
+                double angle = -Math.PI / 2 + i * Math.PI / 5;
+                int radius = i % 2 == 0 ? outer : inner;
+                x[i] = cx + (int) (Math.cos(angle) * radius);
+                y[i] = cy + (int) (Math.sin(angle) * radius);
+            }
+            g.fillPolygon(x, y, x.length);
+        }
+    },
+    USERS {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            g.fillOval(size / 6, size / 5, size / 4, size / 4);
+            g.fillOval(size * 3 / 5, size / 5, size / 4, size / 4);
+            g.fillRoundRect(size / 12, size / 2, size * 5 / 12, size / 3, size / 5, size / 5);
+            g.fillRoundRect(size / 2, size / 2, size * 5 / 12, size / 3, size / 5, size / 5);
+        }
+    },
+    BOX {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            int left = size / 5, right = size * 4 / 5, top = size / 4, bottom = size * 3 / 4;
+            int middle = size / 2;
+            g.drawPolygon(new int[]{left, middle, right, right, middle, left},
+                          new int[]{top, size / 8, top, bottom, size * 7 / 8, bottom}, 6);
+            g.drawLine(left, top, left, bottom);
+            g.drawLine(right, top, right, bottom);
+            g.drawLine(middle, size / 8, middle, size * 7 / 8);
+        }
+    },
+    CIRCLE_X {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            int inset = size / 6;
+            g.setStroke(new BasicStroke(Math.max(1f, size / 10f)));
+            g.drawOval(inset, inset, size - 2 * inset, size - 2 * inset);
+            g.drawLine(size / 3, size / 3, size * 2 / 3, size * 2 / 3);
+            g.drawLine(size * 2 / 3, size / 3, size / 3, size * 2 / 3);
+        }
+    },
+    PLUS {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            g.fillRect(size * 2 / 5, size / 5, size / 5, size * 3 / 5);
+            g.fillRect(size / 5, size * 2 / 5, size * 3 / 5, size / 5);
+        }
+    },
+    CHEVRON {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            g.setStroke(new BasicStroke(Math.max(1f, size / 8f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.drawLine(size / 3, size / 5, size * 2 / 3, size / 2);
+            g.drawLine(size * 2 / 3, size / 2, size / 3, size * 4 / 5);
+        }
+    },
+    BULB {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            LIGHT.draw(g, size, color);
+        }
+    },
+    TRIANGLE {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            g.setStroke(new BasicStroke(Math.max(1f, size / 10f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.drawPolygon(new int[]{size / 2, size / 6, size * 5 / 6},
+                          new int[]{size / 6, size * 5 / 6, size * 5 / 6}, 3);
+        }
+    },
+    DOC {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            DOCUMENT.draw(g, size, color);
+        }
+    },
+    GAVEL {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            g.setStroke(new BasicStroke(Math.max(1f, size / 7f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.drawLine(size / 3, size / 3, size * 2 / 3, size * 2 / 3);
+            g.drawLine(size / 5, size / 5, size / 2, size / 2);
+            g.drawLine(size / 2, size / 2, size * 4 / 5, size * 4 / 5);
+            g.drawLine(size / 3, size * 4 / 5, size * 4 / 5, size * 4 / 5);
+        }
+    },
+    ALERT_CIRCLE {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            int inset = size / 7;
+            g.setStroke(new BasicStroke(Math.max(1f, size / 10f)));
+            g.drawOval(inset, inset, size - 2 * inset, size - 2 * inset);
+            g.drawLine(size / 2, size / 4, size / 2, size * 3 / 5);
+            g.fillOval(size / 2 - size / 16, size * 2 / 3, size / 8, size / 8);
+        }
+    },
+    BOOK {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            g.setStroke(new BasicStroke(Math.max(1f, size / 10f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.drawRoundRect(size / 6, size / 5, size / 3, size * 3 / 5, size / 10, size / 10);
+            g.drawRoundRect(size / 2, size / 5, size / 3, size * 3 / 5, size / 10, size / 10);
+            g.drawLine(size / 2, size / 5, size / 2, size * 4 / 5);
+        }
+    },
+    BUILDING {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            g.drawRect(size / 4, size / 3, size / 2, size * 11 / 20);
+            g.drawPolygon(new int[]{size / 6, size / 2, size * 5 / 6},
+                          new int[]{size / 3, size / 8, size / 3}, 3);
+            g.drawRect(size * 2 / 5, size * 3 / 5, size / 5, size * 11 / 60);
+            g.drawLine(size / 3, size / 2, size / 3, size / 2);
+            g.drawLine(size * 2 / 3, size / 2, size * 2 / 3, size / 2);
+        }
+    },
+    PERSON {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            g.fillOval(size * 3 / 8, size / 6, size / 4, size / 4);
+            g.fillRoundRect(size / 4, size / 2, size / 2, size / 3, size / 4, size / 4);
+        }
+    },
+    INFO {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            g.setStroke(new BasicStroke(Math.max(1f, size / 10f)));
+            g.drawOval(size / 6, size / 6, size * 2 / 3, size * 2 / 3);
+            g.fillOval(size / 2 - size / 16, size / 3, size / 8, size / 8);
+            g.drawLine(size / 2, size / 2, size / 2, size * 2 / 3);
+        }
+    },
+    CLOCK {
+        @Override
+        public void draw(Graphics2D g, int size, Color color) {
+            g.setColor(color);
+            g.setStroke(new BasicStroke(Math.max(1f, size / 10f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.drawOval(size / 6, size / 6, size * 2 / 3, size * 2 / 3);
+            g.drawLine(size / 2, size / 3, size / 2, size / 2);
+            g.drawLine(size / 2, size / 2, size * 2 / 3, size * 3 / 5);
+        }
     };
 
     public abstract void draw(Graphics2D g, int size, Color color);
+
+    public void draw(Graphics2D g, int x, int y, int size) {
+        Graphics2D icon = (Graphics2D) g.create(x, y, size, size);
+        draw(icon, size, g.getColor());
+        icon.dispose();
+    }
+
+    private static void drawSearch(Graphics2D g, int size, Color color) {
+        g.setColor(color);
+        g.setStroke(new BasicStroke(Math.max(1f, size / 8f), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        int diameter = size * 3 / 5;
+        g.drawOval(size / 8, size / 8, diameter, diameter);
+        g.drawLine(size * 3 / 5, size * 3 / 5, size * 7 / 8, size * 7 / 8);
+    }
 }
 
 // ===================== SHARED UI COMPONENTS =====================
+class BackButton extends JButton {
+    BackButton(int size, Runnable action) {
+        setPreferredSize(new Dimension(size, size));
+        setMinimumSize(new Dimension(size, size));
+        setMaximumSize(new Dimension(size, size));
+        getAccessibleContext().setAccessibleName("Back");
+        setToolTipText("Back");
+        setFocusPainted(false);
+        setBorderPainted(false);
+        setContentAreaFilled(false);
+        setOpaque(false);
+        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        addActionListener(event -> action.run());
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        Theme.smooth(g2);
+        int inset = 2;
+        g2.setColor(new Color(255, 255, 255, getModel().isRollover() ? 48 : 28));
+        g2.fillOval(inset, inset, getWidth() - inset * 2, getHeight() - inset * 2);
+        g2.setColor(new Color(255, 255, 255, 180));
+        g2.setStroke(new BasicStroke(2f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        int centerX = getWidth() / 2, centerY = getHeight() / 2;
+        g2.drawLine(centerX + 6, centerY, centerX - 6, centerY);
+        g2.drawLine(centerX - 6, centerY, centerX, centerY - 6);
+        g2.drawLine(centerX - 6, centerY, centerX, centerY + 6);
+        g2.dispose();
+    }
+}
+
+class Divider extends JComponent {
+    Divider() {
+        setOpaque(false);
+        setPreferredSize(new Dimension(1, 1));
+        setMinimumSize(new Dimension(1, 1));
+        setMaximumSize(new Dimension(Integer.MAX_VALUE, 1));
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        g.setColor(Theme.BORDER);
+        g.drawLine(0, 0, getWidth(), 0);
+    }
+}
+
+class ShadowLabel extends JLabel {
+    private final Color shadowColor;
+
+    ShadowLabel(String text, Color shadowColor) {
+        super(text);
+        this.shadowColor = shadowColor;
+        setOpaque(false);
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        Graphics2D shadow = (Graphics2D) g.create();
+        Theme.smooth(shadow);
+        shadow.setFont(getFont());
+        shadow.setColor(shadowColor);
+        FontMetrics metrics = shadow.getFontMetrics();
+        Insets insets = getInsets();
+        int x = switch (getHorizontalAlignment()) {
+            case CENTER -> (getWidth() - metrics.stringWidth(getText())) / 2;
+            case RIGHT, TRAILING -> getWidth() - insets.right - metrics.stringWidth(getText());
+            default -> insets.left;
+        };
+        int y = switch (getVerticalAlignment()) {
+            case TOP -> insets.top + metrics.getAscent();
+            case BOTTOM -> getHeight() - insets.bottom - metrics.getDescent();
+            default -> (getHeight() - metrics.getHeight()) / 2 + metrics.getAscent();
+        };
+        shadow.drawString(getText(), x + 2, y + 2);
+        shadow.dispose();
+        super.paintComponent(g);
+    }
+}
+
+class RoundedButton extends JButton {
+    private final Color backgroundColor;
+
+    RoundedButton(String text) {
+        this(text, Theme.RED, Color.WHITE);
+    }
+
+    RoundedButton(String text, Color backgroundColor, Color foregroundColor) {
+        super(text);
+        this.backgroundColor = backgroundColor;
+        setForeground(foregroundColor);
+        setFont(Theme.bold(12));
+        setMargin(new Insets(7, 14, 7, 14));
+        setContentAreaFilled(false);
+        setBorderPainted(false);
+        setFocusPainted(false);
+        setOpaque(false);
+        setRolloverEnabled(true);
+        setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+    }
+
+    @Override
+    protected void paintComponent(Graphics g) {
+        Graphics2D g2 = (Graphics2D) g.create();
+        Theme.smooth(g2);
+        ButtonModel model = getModel();
+        Color fill = backgroundColor;
+        if (!isEnabled()) {
+            fill = new Color(fill.getRed(), fill.getGreen(), fill.getBlue(), 120);
+        } else if (model.isPressed()) {
+            fill = fill.darker();
+        } else if (model.isRollover()) {
+            fill = fill.brighter();
+        }
+        g2.setColor(fill);
+        g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), 12, 12));
+        g2.dispose();
+        super.paintComponent(g);
+    }
+}
+
 class IconLabel extends JComponent {
     private final IconType type;
     private final Color color;
@@ -643,12 +963,17 @@ class RoundedPanel extends JPanel {
 
 class Badge extends RoundedPanel {
     Badge(String text, Color bg, Color fg, int radius) {
+        this(text, bg, fg, null, radius);
+    }
+
+    Badge(String text, Color bg, Color fg, IconType icon, int radius) {
         super(bg, null, radius);
+        setLayout(new FlowLayout(FlowLayout.LEFT, icon == null ? 0 : 4, 0));
+        if (icon != null) add(new IconLabel(icon, 12, fg));
         JLabel l = new JLabel(text);
         l.setFont(Theme.bold(8));
         l.setForeground(fg);
         setBorder(new EmptyBorder(2, 8, 2, 8));
-        setLayout(new GridBagLayout());
         add(l);
     }
 }

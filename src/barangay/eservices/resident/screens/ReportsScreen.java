@@ -1,6 +1,4 @@
-/**
- * ReportsScreen.java - Reports - concern categories, "Submit a New Report" form with photo, active reports.
- */
+package barangay.eservices;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;

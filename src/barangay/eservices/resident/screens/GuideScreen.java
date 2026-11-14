@@ -1,6 +1,4 @@
-/**
- * GuideScreen.java - Citizen Guide - history, real OpenStreetMap map (MapPanel/MapDialog) and barangay officials.
- */
+package barangay.eservices;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;

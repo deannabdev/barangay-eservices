@@ -1,6 +1,4 @@
-/**
- * DirectoryScreen.java - Directory - Local Businesses with search, filter chips and "view on map".
- */
+package barangay.eservices;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;

@@ -1,6 +1,4 @@
-/**
- * EServicesScreen.java - E-Services - Official Document Requests (cards, fees, request dialog).
- */
+package barangay.eservices;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;

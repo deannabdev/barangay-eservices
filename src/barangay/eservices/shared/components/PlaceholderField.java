@@ -1,3 +1,5 @@
+package barangay.eservices;
+
 import javax.swing.*;
 import java.awt.*;
 

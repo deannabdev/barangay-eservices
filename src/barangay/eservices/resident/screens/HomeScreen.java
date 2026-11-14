@@ -1,6 +1,4 @@
-/**
- * HomeScreen.java - Home - Central Signal Hub (hero banner, hotlines card, quick access portal, announcements).
- */
+package barangay.eservices;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;

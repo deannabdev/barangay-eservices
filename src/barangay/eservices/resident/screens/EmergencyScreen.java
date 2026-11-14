@@ -1,6 +1,4 @@
-/**
- * EmergencyScreen.java - Emergency Hotlines - dark red screen with CALL buttons.
- */
+package barangay.eservices;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
