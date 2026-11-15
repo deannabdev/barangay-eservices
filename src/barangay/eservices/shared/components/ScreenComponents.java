@@ -906,10 +906,17 @@ final class DirectoryComponents {
                     g2.draw(new Line2D.Double(16, 16, 21, 21));
                     break;
                 case STORE:
-                    g2.draw(new Rectangle2D.Double(4, 8, 16, 12));
-                    g2.draw(new Line2D.Double(4, 12, 20, 12));
-                    g2.draw(new Line2D.Double(8, 8, 8, 5));
-                    g2.draw(new Line2D.Double(16, 8, 16, 5));
+                    g2.draw(new Line2D.Double(3, 9, 5, 4));
+                    g2.draw(new Line2D.Double(5, 4, 19, 4));
+                    g2.draw(new Line2D.Double(19, 4, 21, 9));
+                    g2.draw(new Line2D.Double(3, 9, 21, 9));
+                    g2.draw(new Line2D.Double(4, 10, 4, 21));
+                    g2.draw(new Line2D.Double(20, 10, 20, 21));
+                    g2.draw(new Line2D.Double(4, 21, 20, 21));
+                    g2.draw(new Line2D.Double(9, 9, 9, 12));
+                    g2.draw(new Line2D.Double(15, 9, 15, 12));
+                    g2.draw(new Rectangle2D.Double(10, 15, 4, 6));
+                    g2.draw(new Rectangle2D.Double(6, 14, 2, 3));
                     break;
                 case STAR:
                     Path2D star = new Path2D.Double();
@@ -986,16 +993,22 @@ final class DirectoryComponents {
     public static class FilterChips extends JPanel {
         public FilterChips(String[] labels, String selected, Consumer<String> onSelect) {
             setOpaque(false);
-            setLayout(new FlowLayout(FlowLayout.LEFT, 8, 0));
+            setLayout(new FlowLayout(FlowLayout.LEFT, 4, 0));
             setBorder(BorderFactory.createEmptyBorder(0, 0, 4, 0));
             for (String label : labels) {
                 Chip chip = new Chip(label);
                 chip.setSelected(label.equals(selected));
-                chip.addMouseListener(new MouseAdapter() {
+                MouseAdapter selectChip = new MouseAdapter() {
                     @Override public void mouseClicked(MouseEvent e) {
+                        for (Component component : getComponents()) {
+                            Chip candidate = (Chip) component;
+                            candidate.setSelected(candidate == chip);
+                        }
                         if (onSelect != null) onSelect.accept(label);
                     }
-                });
+                };
+                chip.addMouseListener(selectChip);
+                chip.text.addMouseListener(selectChip);
                 add(chip);
             }
         }
@@ -1009,7 +1022,7 @@ final class DirectoryComponents {
                 this.label = label;
                 setOpaque(false);
                 setLayout(new BorderLayout());
-                setBorder(BorderFactory.createEmptyBorder(5, 11, 5, 11));
+                setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 8));
                 text = new JLabel(label);
                 text.setFont(HomeComponents.font(Font.PLAIN, 11));
                 add(text, BorderLayout.CENTER);
