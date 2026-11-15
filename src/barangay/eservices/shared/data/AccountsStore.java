@@ -27,6 +27,7 @@ final class AccountsStore {
     private static final long RESET_CODE_LIFETIME_MILLIS = 15 * 60 * 1000L;
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final Path STORE = Paths.get("database", "accounts.properties");
+    private static String currentAccountId;
 
     private AccountsStore() {}
 
@@ -91,14 +92,99 @@ final class AccountsStore {
 
     static synchronized boolean authenticate(String identifier, char[] password)
             throws IOException, GeneralSecurityException {
+        currentAccountId = null;
         Properties data = load();
         String accountId = data.getProperty(aliasKey(identifier));
-        if (accountId == null) return false;
+        if (accountId == null) {
+            currentAccountId = null;
+            return false;
+        }
 
         String accountPrefix = accountPrefix(accountId);
         byte[] salt = decode(data.getProperty(accountPrefix + "salt"));
         byte[] expected = decode(data.getProperty(accountPrefix + "passwordHash"));
-        return MessageDigest.isEqual(expected, hash(password, salt));
+        boolean authenticated = MessageDigest.isEqual(expected, hash(password, salt));
+        currentAccountId = authenticated ? accountId : null;
+        return authenticated;
+    }
+
+    static synchronized AccountProfile getCurrentProfile() throws IOException {
+        if (currentAccountId == null) return null;
+
+        Properties data = load();
+        String prefix = accountPrefix(currentAccountId) + "profile.";
+        if (!data.containsKey(prefix + "firstName")) {
+            throw new IOException("The signed-in account profile could not be found.");
+        }
+        return new AccountProfile(
+                data.getProperty(prefix + "firstName", ""),
+                data.getProperty(prefix + "middleName", ""),
+                data.getProperty(prefix + "lastName", ""),
+                data.getProperty(prefix + "suffix", ""),
+                data.getProperty(prefix + "birthDate", ""),
+                data.getProperty(prefix + "gender", ""),
+                data.getProperty(prefix + "civilStatus", ""),
+                data.getProperty(prefix + "houseNumber", ""),
+                data.getProperty(prefix + "street", ""),
+                data.getProperty(prefix + "barangay", ""),
+                data.getProperty(prefix + "city", ""),
+                data.getProperty(prefix + "email", ""),
+                data.getProperty(prefix + "mobile", ""));
+    }
+
+    static synchronized void updateCurrentProfile(RegistrationData profile) throws IOException {
+        if (currentAccountId == null) {
+            throw new IOException("There is no signed-in account to update.");
+        }
+        if (profile.email.trim().isEmpty() || profile.mobile.trim().isEmpty()) {
+            throw new IOException("Email address and mobile number are required.");
+        }
+
+        Properties data = load();
+        String prefix = accountPrefix(currentAccountId) + "profile.";
+        if (!data.containsKey(prefix + "firstName")) {
+            throw new IOException("The signed-in account profile could not be found.");
+        }
+
+        String emailKey = aliasKey(profile.email);
+        String mobileKey = aliasKey(profile.mobile);
+        String emailOwner = data.getProperty(emailKey);
+        String mobileOwner = data.getProperty(mobileKey);
+        if ((emailOwner != null && !currentAccountId.equals(emailOwner))
+                || (mobileOwner != null && !currentAccountId.equals(mobileOwner))) {
+            throw new IOException("That email address or mobile number is already linked to another account.");
+        }
+
+        removeCurrentAlias(data, prefix + "email", currentAccountId);
+        removeCurrentAlias(data, prefix + "mobile", currentAccountId);
+        data.setProperty(emailKey, currentAccountId);
+        data.setProperty(mobileKey, currentAccountId);
+        data.setProperty(prefix + "firstName", profile.firstName);
+        data.setProperty(prefix + "middleName", profile.middleName);
+        data.setProperty(prefix + "lastName", profile.lastName);
+        data.setProperty(prefix + "suffix", profile.suffix);
+        data.setProperty(prefix + "birthDate", profile.birthDate);
+        data.setProperty(prefix + "gender", profile.gender);
+        data.setProperty(prefix + "civilStatus", profile.civilStatus);
+        data.setProperty(prefix + "houseNumber", profile.houseNumber);
+        data.setProperty(prefix + "street", profile.street);
+        data.setProperty(prefix + "barangay", profile.barangay);
+        data.setProperty(prefix + "city", profile.city);
+        data.setProperty(prefix + "email", profile.email);
+        data.setProperty(prefix + "mobile", profile.mobile);
+        save(data);
+    }
+
+    private static void removeCurrentAlias(Properties data, String profileKey, String accountId) {
+        String identifier = data.getProperty(profileKey);
+        if (identifier == null || identifier.trim().isEmpty()) return;
+
+        String key = aliasKey(identifier);
+        if (accountId.equals(data.getProperty(key))) data.remove(key);
+    }
+
+    static synchronized void clearCurrentAccount() {
+        currentAccountId = null;
     }
 
     /** Returns a six-digit demo code, or null when the account does not exist. */
@@ -233,6 +319,40 @@ final class AccountsStore {
         } finally {
             Arrays.fill(characters, '\0');
         }
+    }
+}
+
+final class AccountProfile {
+    final String firstName;
+    final String middleName;
+    final String lastName;
+    final String suffix;
+    final String birthDate;
+    final String gender;
+    final String civilStatus;
+    final String houseNumber;
+    final String street;
+    final String barangay;
+    final String city;
+    final String email;
+    final String mobile;
+
+    AccountProfile(String firstName, String middleName, String lastName, String suffix, String birthDate,
+                   String gender, String civilStatus, String houseNumber, String street,
+                   String barangay, String city, String email, String mobile) {
+        this.firstName = firstName;
+        this.middleName = middleName;
+        this.lastName = lastName;
+        this.suffix = suffix;
+        this.birthDate = birthDate;
+        this.gender = gender;
+        this.civilStatus = civilStatus;
+        this.houseNumber = houseNumber;
+        this.street = street;
+        this.barangay = barangay;
+        this.city = city;
+        this.email = email;
+        this.mobile = mobile;
     }
 }
 
