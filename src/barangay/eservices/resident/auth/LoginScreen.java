@@ -5,6 +5,7 @@ import java.awt.event.*;
 import java.util.Arrays;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
+import java.util.concurrent.ExecutionException;
 
 public class LoginScreen extends JFrame {
 
@@ -14,6 +15,9 @@ public class LoginScreen extends JFrame {
     private PlaceholderField emailField;
     private PlaceholderPasswordField passwordField;
     private PasswordVisibilityButton eyeButton;
+    private LoginButton loginButton;
+    private JProgressBar loginProgress;
+    private boolean authenticating;
 
     public LoginScreen() {
         super("Barangay Central Signal Hub");
@@ -85,10 +89,19 @@ public class LoginScreen extends JFrame {
         root.add(forgot);
 
         // Log In button
-        LoginButton login = new LoginButton("Log In", LoginTheme.font(Font.BOLD, 13f));
-        login.setBounds(70, 557, 207, 34);
-        login.addActionListener(e -> doLogin());
-        root.add(login);
+        loginButton = new LoginButton("Log In", LoginTheme.font(Font.BOLD, 13f));
+        loginButton.setBounds(70, 557, 207, 34);
+        loginButton.addActionListener(e -> doLogin());
+        root.add(loginButton);
+
+        loginProgress = new JProgressBar();
+        loginProgress.setIndeterminate(true);
+        loginProgress.setBorderPainted(false);
+        loginProgress.setForeground(LoginTheme.RED);
+        loginProgress.setBackground(Color.WHITE);
+        loginProgress.setBounds(70, 600, 207, 5);
+        loginProgress.setVisible(false);
+        root.add(loginProgress);
 
         // Register link
         JLabel register = new JLabel(
@@ -119,6 +132,8 @@ public class LoginScreen extends JFrame {
     }
 
     private void doLogin() {
+        if (authenticating) return;
+
         String user = emailField.getText().trim();
         char[] pass = passwordField.getPassword();
         if (user.isEmpty() || pass.length == 0) {
@@ -127,20 +142,60 @@ public class LoginScreen extends JFrame {
             Arrays.fill(pass, '\0');
             return;
         }
-        try {
-            if (!AccountsStore.authenticate(user, pass)) {
-                JOptionPane.showMessageDialog(this, "The email/mobile number or password is incorrect.",
-                        "Login failed", JOptionPane.WARNING_MESSAGE);
-                return;
+
+        setLoginLoading(true);
+        new SwingWorker<Boolean, Void>() {
+            @Override
+            protected Boolean doInBackground() throws IOException, GeneralSecurityException {
+                try {
+                    return AccountsStore.authenticate(user, pass);
+                } finally {
+                    Arrays.fill(pass, '\0');
+                }
             }
-            dispose();
-            new HomeWindow().setVisible(true);
-        } catch (IOException | GeneralSecurityException ex) {
-            JOptionPane.showMessageDialog(this, "Could not read the local account store:\n" + ex.getMessage(),
-                    "Login error", JOptionPane.ERROR_MESSAGE);
-        } finally {
-            Arrays.fill(pass, '\0');
-        }
+
+            @Override
+            protected void done() {
+                try {
+                    if (get()) {
+                        HomeWindow home = new HomeWindow();
+                        setLoginLoading(false);
+                        dispose();
+                        home.setVisible(true);
+                    } else {
+                        JOptionPane.showMessageDialog(LoginScreen.this,
+                                "The email/mobile number or password is incorrect.",
+                                "Login failed", JOptionPane.WARNING_MESSAGE);
+                    }
+                } catch (InterruptedException ex) {
+                    Thread.currentThread().interrupt();
+                    JOptionPane.showMessageDialog(LoginScreen.this,
+                            "Login was interrupted. Please try again.",
+                            "Login error", JOptionPane.ERROR_MESSAGE);
+                } catch (ExecutionException ex) {
+                    Throwable cause = ex.getCause();
+                    if (cause instanceof IOException || cause instanceof GeneralSecurityException) {
+                        JOptionPane.showMessageDialog(LoginScreen.this,
+                                "Could not read the local account store:\n" + cause.getMessage(),
+                                "Login error", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        throw new IllegalStateException("Unexpected error during login", cause);
+                    }
+                } finally {
+                    if (isDisplayable()) setLoginLoading(false);
+                }
+            }
+        }.execute();
+    }
+
+    private void setLoginLoading(boolean loading) {
+        authenticating = loading;
+        loginButton.setEnabled(!loading);
+        loginButton.setText(loading ? "Signing in..." : "Log In");
+        loginProgress.setVisible(loading);
+        emailField.setEnabled(!loading);
+        passwordField.setEnabled(!loading);
+        eyeButton.setEnabled(!loading);
     }
 
     /** Forgot Password screen (reuses the login screen's components). */
