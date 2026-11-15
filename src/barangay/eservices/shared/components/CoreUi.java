@@ -3,6 +3,7 @@ package barangay.eservices;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.geom.Path2D;
 import java.awt.geom.RoundRectangle2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,12 +19,28 @@ class BackButton extends JButton {
         setBorderPainted(false);
         setContentAreaFilled(false);
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        setText("←");
-        setFont(Theme.bold(20));
-        setForeground(Theme.TEXT);
         addActionListener(event -> {
             if (action != null) action.run();
         });
+    }
+
+    @Override
+    protected void paintComponent(Graphics g0) {
+        Graphics2D g = (Graphics2D) g0.create();
+        Theme.smooth(g);
+        double cx = getWidth() / 2.0;
+        double cy = getHeight() / 2.0;
+        Path2D arrow = new Path2D.Double();
+        arrow.moveTo(cx + 8, cy);
+        arrow.lineTo(cx - 8, cy);
+        arrow.moveTo(cx - 8, cy);
+        arrow.lineTo(cx, cy - 8);
+        arrow.moveTo(cx - 8, cy);
+        arrow.lineTo(cx, cy + 8);
+        g.setColor(Color.WHITE);
+        g.setStroke(new BasicStroke(2.4f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g.draw(arrow);
+        g.dispose();
     }
 }
 
