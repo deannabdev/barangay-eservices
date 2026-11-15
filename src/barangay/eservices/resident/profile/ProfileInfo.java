@@ -3,6 +3,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import java.awt.*;
+import java.io.IOException;
 import java.util.Arrays;
 
 public class ProfileInfo extends JFrame {
@@ -33,6 +34,7 @@ public class ProfileInfo extends JFrame {
 
     private ProfileActionButton save;
     private String[] saved;   // the values as last saved, used to detect edits
+    private boolean profileLoaded;
 
     public ProfileInfo() {
         super("My Account");
@@ -47,14 +49,33 @@ public class ProfileInfo extends JFrame {
         root.setPreferredSize(new Dimension(W, H));
         buildUI(root);
 
-        // TODO: replace this sample data with the logged-in user's saved details (database / API).
-        setProfile("Juan", "", "Santos", "Dela Cruz", "01/15/2000", "Male", "Single",
-                "Block 5 Lot 12", "Mabini St.", "09123456789", "juandelacruz@gmail.com");
+        IOException profileError = null;
+        try {
+            AccountProfile profile = AccountsStore.getCurrentProfile();
+            if (profile == null) {
+                throw new IOException("No signed-in account is available.");
+            }
+            setProfile(profile.firstName, profile.suffix, profile.middleName, profile.lastName,
+                    profile.birthDate, profile.gender, profile.civilStatus, profile.houseNumber,
+                    profile.street, profile.mobile, profile.email);
+            barangay.setText(profile.barangay);
+            city.setText(profile.city);
+            profileLoaded = true;
+            refreshState();
+        } catch (IOException ex) {
+            profileError = ex;
+        }
         watchForEdits();
 
         setContentPane(root);
         pack();
         setLocationRelativeTo(null);
+        if (profileError != null) {
+            save.setEnabled(false);
+            String message = "Could not load the signed-in account profile:\n" + profileError.getMessage();
+            SwingUtilities.invokeLater(() -> JOptionPane.showMessageDialog(this, message,
+                    "Profile error", JOptionPane.ERROR_MESSAGE));
+        }
     }
 
     /**
@@ -184,7 +205,7 @@ public class ProfileInfo extends JFrame {
     }
 
     private void refreshState() {
-        if (save != null) save.setEnabled(isDirty());
+        if (save != null) save.setEnabled(profileLoaded && isDirty());
     }
 
     private void watchForEdits() {
@@ -233,13 +254,35 @@ public class ProfileInfo extends JFrame {
             return;
         }
 
-        // TODO: save the changes (database / API) here.
+        RegistrationData profile = new RegistrationData();
+        profile.firstName = firstName.getText().trim();
+        profile.suffix = suffix.getText().trim();
+        profile.middleName = middleName.getText().trim();
+        profile.lastName = lastName.getText().trim();
+        profile.birthDate = birthDate.getText().trim();
+        profile.gender = selected(gender);
+        profile.civilStatus = selected(civilStatus);
+        profile.houseNumber = houseNo.getText().trim();
+        profile.street = street.getText().trim();
+        profile.barangay = barangay.getText().trim();
+        profile.city = city.getText().trim();
+        profile.mobile = mobile.getText().trim();
+        profile.email = email.getText().trim();
+        try {
+            AccountsStore.updateCurrentProfile(profile);
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this,
+                    "Could not save your profile:\n" + ex.getMessage(),
+                    "Profile save error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         JOptionPane.showMessageDialog(this, "Your changes have been saved.");
         saved = values();
 
         // Back to the profile screen showing the updated details
-        String fullName = (firstName.getText().trim() + " " + lastName.getText().trim()
-                + " " + suffix.getText().trim()).trim();
+        String fullName = (firstName.getText().trim() + " " + middleName.getText().trim() + " "
+                + lastName.getText().trim() + " " + suffix.getText().trim()).trim();
         dispose();
         ProfileScreen.showWindow(fullName, email.getText().trim(), mobile.getText().trim());
     }
