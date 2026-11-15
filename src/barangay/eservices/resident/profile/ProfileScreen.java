@@ -1,6 +1,7 @@
 package barangay.eservices;
 import javax.swing.*;
 import java.awt.*;
+import java.io.IOException;
 
 public class ProfileScreen extends ProfileScreenBackgroundPanel {
 
@@ -21,7 +22,7 @@ public class ProfileScreen extends ProfileScreenBackgroundPanel {
         setLayout(null);
         setPreferredSize(new Dimension(W, navigator == null ? H : H - 86));
         buildUI(this);
-        setUser("Juan Dela Cruz", "juandelacruz@gmail.com", "09123456789");
+        loadCurrentUser();
     }
 
     private void openWindow() {
@@ -46,8 +47,41 @@ public class ProfileScreen extends ProfileScreenBackgroundPanel {
 
     /** Updates the name, email and phone shown in the profile card. */
     public void setUser(String name, String email, String phone) {
-        nameLabel.setText(name);
-        contactLabel.setText(email + " | " + phone);
+        nameLabel.setText(name == null || name.trim().isEmpty() ? "Your Name" : name.trim());
+        String contact = email == null ? "" : email.trim();
+        if (phone != null && !phone.trim().isEmpty()) {
+            contact += (contact.isEmpty() ? "" : " | ") + phone.trim();
+        }
+        contactLabel.setText(contact);
+    }
+
+    private void loadCurrentUser() {
+        try {
+            AccountProfile profile = AccountsStore.getCurrentProfile();
+            if (profile == null) {
+                setUser("Your Name", "", "");
+                return;
+            }
+
+            StringBuilder name = new StringBuilder();
+            appendNamePart(name, profile.firstName);
+            appendNamePart(name, profile.middleName);
+            appendNamePart(name, profile.lastName);
+            appendNamePart(name, profile.suffix);
+            setUser(name.toString(), profile.email, profile.mobile);
+        } catch (IOException ex) {
+            setUser("Profile unavailable", "", "");
+            JOptionPane.showMessageDialog(this,
+                    "Could not read the local account profile:\n" + ex.getMessage(),
+                    "Profile error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private static void appendNamePart(StringBuilder name, String part) {
+        if (part != null && !part.trim().isEmpty()) {
+            if (name.length() > 0) name.append(' ');
+            name.append(part.trim());
+        }
     }
 
     private void buildUI(JPanel root) {
@@ -141,6 +175,7 @@ public class ProfileScreen extends ProfileScreenBackgroundPanel {
         int answer = JOptionPane.showConfirmDialog(this, "Are you sure you want to log out?",
                 "Log Out", JOptionPane.YES_NO_OPTION);
         if (answer == JOptionPane.YES_OPTION) {
+            AccountsStore.clearCurrentAccount();
             closeWindow();
             new LoginScreen().setVisible(true);
         }
