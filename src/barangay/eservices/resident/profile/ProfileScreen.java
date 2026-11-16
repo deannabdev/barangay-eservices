@@ -170,7 +170,7 @@ public class ProfileScreen extends ProfileScreenBackgroundPanel {
     private void refreshActiveItems() {
         activeItems.removeAll();
         try {
-            List<SubmissionRecord> records = new ArrayList<>();
+            List<Submissions.SubmissionRecord> records = new ArrayList<>();
             records.addAll(AccountsStore.getCurrentSubmissions("REPORT"));
             records.addAll(AccountsStore.getCurrentSubmissions("DOCUMENT"));
             records.sort((first, second) -> Long.compare(second.getSubmittedAt(), first.getSubmittedAt()));
@@ -182,7 +182,7 @@ public class ProfileScreen extends ProfileScreenBackgroundPanel {
                 empty.setBorder(new EmptyBorder(10, 4, 0, 0));
                 activeItems.add(empty);
             } else {
-                for (SubmissionRecord record : records) {
+                for (Submissions.SubmissionRecord record : records) {
                     String type = "REPORT".equals(record.kind) ? "Report: " : "Request: ";
                     ProfileRequestCard card = new ProfileRequestCard(
                             type + record.title, record.reference, record.status);
