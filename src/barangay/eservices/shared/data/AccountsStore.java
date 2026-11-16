@@ -187,6 +187,10 @@ final class AccountsStore {
         currentAccountId = null;
     }
 
+    static synchronized String getCurrentAccountId() {
+        return currentAccountId;
+    }
+
     /** Returns a six-digit demo code, or null when the account does not exist. */
     static synchronized String createResetCode(String identifier)
             throws IOException, GeneralSecurityException {
