@@ -443,14 +443,6 @@ class ProfileRequestCard extends JComponent {
         g.draw(new Line2D.Double(18, cy + 1, 24, cy + 1));
         g.draw(new Line2D.Double(18, cy + 5, 24, cy + 5));
 
-        g.setColor(ProfileTheme.NAVY);
-        g.setFont(ProfileTheme.font(Font.BOLD, 10f));
-        FontMetrics fm = g.getFontMetrics();
-        g.drawString(title, 44, (int) (cy - 3));
-        g.setColor(ProfileTheme.GRAY);
-        g.setFont(ProfileTheme.font(Font.PLAIN, 8.5f));
-        g.drawString(ref, 44, (int) (cy + 12));
-
         Color bg, fg;
         switch (status.toUpperCase()) {
             case "APPROVED": bg = new Color(214, 240, 222); fg = new Color(30, 110, 55); break;
@@ -458,7 +450,7 @@ class ProfileRequestCard extends JComponent {
             default: bg = new Color(255, 236, 179); fg = new Color(230, 140, 0); break;
         }
         g.setFont(ProfileTheme.font(Font.BOLD, 8f));
-        fm = g.getFontMetrics();
+        FontMetrics fm = g.getFontMetrics();
         int pw = fm.stringWidth(status) + 18, ph = 19;
         int px = w - pw - 12, py = (int) (cy - ph / 2.0);
         g.setColor(bg);
@@ -466,6 +458,21 @@ class ProfileRequestCard extends JComponent {
         g.setColor(fg);
         g.drawString(status, px + (pw - fm.stringWidth(status)) / 2,
                 py + (ph - fm.getHeight()) / 2 + fm.getAscent());
+
+        g.setColor(ProfileTheme.NAVY);
+        g.setFont(ProfileTheme.font(Font.BOLD, 10f));
+        fm = g.getFontMetrics();
+        int titleWidth = Math.max(0, px - 50);
+        String displayTitle = title;
+        while (!displayTitle.isEmpty()
+                && fm.stringWidth(displayTitle + (displayTitle.equals(title) ? "" : "...")) > titleWidth) {
+            displayTitle = displayTitle.substring(0, displayTitle.length() - 1);
+        }
+        if (!displayTitle.equals(title)) displayTitle += "...";
+        g.drawString(displayTitle, 44, (int) (cy - 3));
+        g.setColor(ProfileTheme.GRAY);
+        g.setFont(ProfileTheme.font(Font.PLAIN, 8.5f));
+        g.drawString(ref, 44, (int) (cy + 12));
         g.dispose();
     }
 }
