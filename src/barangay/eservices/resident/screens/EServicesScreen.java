@@ -174,7 +174,7 @@ class DocumentRequestDialog {
                 continue;                                              // show the form again
             }
 
-            SubmissionRecord submission;
+            Submissions.SubmissionRecord submission;
             try {
                 submission = AccountsStore.addDocumentSubmission(request, name, contact);
             } catch (java.io.IOException ex) {
