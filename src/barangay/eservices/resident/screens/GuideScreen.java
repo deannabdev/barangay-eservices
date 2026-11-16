@@ -9,7 +9,6 @@ import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.net.HttpURLConnection;
 import java.net.URI;
-import java.net.URL;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -273,7 +272,8 @@ class MapPanel extends JPanel {
         POOL.submit(() -> {
             try {
                 HttpURLConnection c = (HttpURLConnection)
-                        new URL("https://tile.openstreetmap.org/" + z + "/" + x + "/" + y + ".png").openConnection();
+                        URI.create("https://tile.openstreetmap.org/" + z + "/" + x + "/" + y + ".png")
+                                .toURL().openConnection();
                 c.setRequestProperty("User-Agent", USER_AGENT);   // required by the OpenStreetMap tile policy
                 c.setConnectTimeout(8000);
                 c.setReadTimeout(8000);
