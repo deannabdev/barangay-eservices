@@ -173,8 +173,18 @@ class DocumentRequestDialog {
                         "Document Request", JOptionPane.WARNING_MESSAGE);
                 continue;                                              // show the form again
             }
+
+            SubmissionRecord submission;
+            try {
+                submission = AccountsStore.addDocumentSubmission(request, name, contact);
+            } catch (java.io.IOException ex) {
+                JOptionPane.showMessageDialog(parent, "Could not save your document request:\n" + ex.getMessage(),
+                        "Document request error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
             JOptionPane.showMessageDialog(parent,
-                    "Request submitted!\n\nDocument: " + request.getTitle()
+                    "Request submitted!\n\n" + submission.reference
+                            + "\nDocument: " + request.getTitle()
                             + "\nName: " + name + "\nContact: " + contact
                             + "\nProcessing: " + request.getProcessing(),
                     "Document Request", JOptionPane.INFORMATION_MESSAGE);
