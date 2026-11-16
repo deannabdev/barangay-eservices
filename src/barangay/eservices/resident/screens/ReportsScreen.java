@@ -103,7 +103,7 @@ class ReportsContent extends AppSection implements Scrollable {
         if (draft == null) return;                       // cancelled
 
         try {
-            SubmissionRecord submission = AccountsStore.addReportSubmission(draft);
+            Submissions.SubmissionRecord submission = AccountsStore.addReportSubmission(draft);
             IconType icon = IconType.WARNING;
             for (ConcernCategory c : categories) {
                 if (c.getName().equals(draft.getCategory())) icon = c.getIcon();
@@ -124,7 +124,7 @@ class ReportsContent extends AppSection implements Scrollable {
 
     private void loadSavedReports() {
         try {
-            for (SubmissionRecord submission : AccountsStore.getCurrentSubmissions("REPORT")) {
+            for (Submissions.SubmissionRecord submission : AccountsStore.getCurrentSubmissions("REPORT")) {
                 IconType icon = IconType.WARNING;
                 for (ConcernCategory category : categories) {
                     if (category.getName().equals(submission.category)) {
