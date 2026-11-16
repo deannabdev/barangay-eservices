@@ -418,9 +418,10 @@ class ProfileMenuRow extends JComponent {
 
 /** One active request with its reference number and status. */
 class ProfileRequestCard extends JComponent {
-    private final String title, ref, status;
+    private final String title, ref;
+    private final Submissions.SubmissionStatus status;
 
-    ProfileRequestCard(String title, String ref, String status) {
+    ProfileRequestCard(String title, String ref, Submissions.SubmissionStatus status) {
         this.title = title;
         this.ref = ref;
         this.status = status;
@@ -443,20 +444,21 @@ class ProfileRequestCard extends JComponent {
         g.draw(new Line2D.Double(18, cy + 1, 24, cy + 1));
         g.draw(new Line2D.Double(18, cy + 5, 24, cy + 5));
 
+        String statusLabel = status == null ? "Pending" : status.getLabel();
         Color bg, fg;
-        switch (status.toUpperCase()) {
-            case "APPROVED": bg = new Color(214, 240, 222); fg = new Color(30, 110, 55); break;
+        switch (status == null ? "PENDING" : status.name()) {
+            case "COMPLETED": bg = new Color(214, 240, 222); fg = new Color(30, 110, 55); break;
             case "REJECTED": bg = new Color(250, 218, 218); fg = new Color(180, 30, 30); break;
             default: bg = new Color(255, 236, 179); fg = new Color(230, 140, 0); break;
         }
         g.setFont(ProfileTheme.font(Font.BOLD, 8f));
         FontMetrics fm = g.getFontMetrics();
-        int pw = fm.stringWidth(status) + 18, ph = 19;
+        int pw = fm.stringWidth(statusLabel) + 18, ph = 19;
         int px = w - pw - 12, py = (int) (cy - ph / 2.0);
         g.setColor(bg);
         g.fill(new RoundRectangle2D.Double(px, py, pw, ph, 8, 8));
         g.setColor(fg);
-        g.drawString(status, px + (pw - fm.stringWidth(status)) / 2,
+        g.drawString(statusLabel, px + (pw - fm.stringWidth(statusLabel)) / 2,
                 py + (ph - fm.getHeight()) / 2 + fm.getAscent());
 
         g.setColor(ProfileTheme.NAVY);
