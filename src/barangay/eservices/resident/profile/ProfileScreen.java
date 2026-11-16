@@ -1,7 +1,10 @@
 package barangay.eservices;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ProfileScreen extends ProfileScreenBackgroundPanel {
 
@@ -11,6 +14,7 @@ public class ProfileScreen extends ProfileScreenBackgroundPanel {
     // ---- User data shown on the screen (call setUser to change) ----
     private final JLabel nameLabel    = new JLabel("Your Name", SwingConstants.CENTER);
     private final JLabel contactLabel = new JLabel("", SwingConstants.CENTER);
+    private final JPanel activeItems = new JPanel();
     private final Navigator navigator;
 
     public ProfileScreen() {
@@ -23,6 +27,11 @@ public class ProfileScreen extends ProfileScreenBackgroundPanel {
         setPreferredSize(new Dimension(W, navigator == null ? H : H - 86));
         buildUI(this);
         loadCurrentUser();
+        if (navigator != null) {
+            navigator.attach(screen -> {
+                if ("Profile".equals(screen)) refreshActiveItems();
+            });
+        }
     }
 
     private void openWindow() {
@@ -60,15 +69,15 @@ public class ProfileScreen extends ProfileScreenBackgroundPanel {
             AccountProfile profile = AccountsStore.getCurrentProfile();
             if (profile == null) {
                 setUser("Your Name", "", "");
-                return;
+            } else {
+                StringBuilder name = new StringBuilder();
+                appendNamePart(name, profile.firstName);
+                appendNamePart(name, profile.middleName);
+                appendNamePart(name, profile.lastName);
+                appendNamePart(name, profile.suffix);
+                setUser(name.toString(), profile.email, profile.mobile);
             }
-
-            StringBuilder name = new StringBuilder();
-            appendNamePart(name, profile.firstName);
-            appendNamePart(name, profile.middleName);
-            appendNamePart(name, profile.lastName);
-            appendNamePart(name, profile.suffix);
-            setUser(name.toString(), profile.email, profile.mobile);
+            refreshActiveItems();
         } catch (IOException ex) {
             setUser("Profile unavailable", "", "");
             JOptionPane.showMessageDialog(this,
@@ -133,24 +142,22 @@ public class ProfileScreen extends ProfileScreenBackgroundPanel {
         logout.setBounds(M, 487, CW, 32);
         root.add(logout);
 
-        // Active requests
-        JLabel requests = new JLabel("Your Active Requests");
+        JLabel requests = new JLabel("Your Active Reports & Requests");
         requests.setFont(ProfileTheme.font(Font.BOLD, 12f));
         requests.setForeground(ProfileTheme.NAVY);
         requests.setBounds(M, 530, CW, 18);
         root.add(requests);
 
-        String[][] data = {
-                {"Barangay Clearance Request", "Ref: #BCS-2026-0894", "PENDING"},
-                // add more: {"Title", "Ref: #...", "APPROVED"}
-        };
-        int y = 557;
-        for (String[] r : data) {
-            ProfileRequestCard card = new ProfileRequestCard(r[0], r[1], r[2]);
-            card.setBounds(M, y, CW, 57);
-            root.add(card);
-            y += 63;
-        }
+        activeItems.setOpaque(false);
+        activeItems.setLayout(new BoxLayout(activeItems, BoxLayout.Y_AXIS));
+        JScrollPane activeItemsScroll = new JScrollPane(activeItems);
+        activeItemsScroll.setBounds(M, 551, CW, 130);
+        activeItemsScroll.setBorder(null);
+        activeItemsScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+        activeItemsScroll.getViewport().setOpaque(false);
+        activeItemsScroll.setOpaque(false);
+        activeItemsScroll.getVerticalScrollBar().setUnitIncrement(12);
+        root.add(activeItemsScroll);
 
         // Bottom navigation
         if (navigator == null) {
@@ -158,6 +165,46 @@ public class ProfileScreen extends ProfileScreenBackgroundPanel {
             nav.setBounds(0, 689, W, H - 689);
             root.add(nav);
         }
+    }
+
+    private void refreshActiveItems() {
+        activeItems.removeAll();
+        try {
+            List<SubmissionRecord> records = new ArrayList<>();
+            records.addAll(AccountsStore.getCurrentSubmissions("REPORT"));
+            records.addAll(AccountsStore.getCurrentSubmissions("DOCUMENT"));
+            records.sort((first, second) -> Long.compare(second.getSubmittedAt(), first.getSubmittedAt()));
+
+            if (records.isEmpty()) {
+                JLabel empty = new JLabel("No active reports or requests yet.");
+                empty.setFont(ProfileTheme.font(Font.PLAIN, 9.5f));
+                empty.setForeground(ProfileTheme.GRAY);
+                empty.setBorder(new EmptyBorder(10, 4, 0, 0));
+                activeItems.add(empty);
+            } else {
+                for (SubmissionRecord record : records) {
+                    String type = "REPORT".equals(record.kind) ? "Report: " : "Request: ";
+                    ProfileRequestCard card = new ProfileRequestCard(
+                            type + record.title, record.reference, record.status);
+                    card.setPreferredSize(new Dimension(CW, 54));
+                    card.setMinimumSize(new Dimension(CW, 54));
+                    card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 54));
+                    card.setAlignmentX(LEFT_ALIGNMENT);
+                    activeItems.add(card);
+                    activeItems.add(Box.createVerticalStrut(4));
+                }
+            }
+        } catch (IOException ex) {
+            JLabel error = new JLabel("Could not load active items.");
+            error.setFont(ProfileTheme.font(Font.PLAIN, 9.5f));
+            error.setForeground(ProfileTheme.GRAY);
+            activeItems.add(error);
+            JOptionPane.showMessageDialog(this,
+                    "Could not load your active reports and requests:\n" + ex.getMessage(),
+                    "Active items error", JOptionPane.ERROR_MESSAGE);
+        }
+        activeItems.revalidate();
+        activeItems.repaint();
     }
 
     private void navigate(int index) {
