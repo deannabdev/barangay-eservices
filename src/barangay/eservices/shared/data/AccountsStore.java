@@ -17,6 +17,9 @@ import java.util.Arrays;
 import java.util.Locale;
 import java.util.Properties;
 import java.util.UUID;
+import java.util.List;
+import java.util.ArrayList;
+import java.time.LocalDateTime;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 
@@ -322,6 +325,114 @@ final class AccountsStore {
             return hash(characters, salt);
         } finally {
             Arrays.fill(characters, '\0');
+        }
+    }
+
+    private static final Path SUBMISSIONS_STORE = Paths.get("database", "submissions.properties");
+
+    static synchronized Submissions.SubmissionRecord addDocumentSubmission(
+            DocumentRequest request, String name, String contact) throws IOException {
+        String reference = Submissions.generateReference();
+        LocalDateTime now = LocalDateTime.now();
+        Submissions.SubmissionRecord record = new Submissions.SubmissionRecord(
+                "DOCUMENT", request.getTitle(), reference,
+                Submissions.SubmissionStatus.PENDING, now, name,
+                null, contact, null, null);
+        saveSubmission(record);
+        return record;
+    }
+
+    static synchronized Submissions.SubmissionRecord addReportSubmission(ReportDraft draft)
+            throws IOException {
+        String reference = Submissions.generateReference();
+        LocalDateTime now = LocalDateTime.now();
+        String photoPath = draft.getPhoto() != null ? draft.getPhoto().getPath() : null;
+        Submissions.SubmissionRecord record = new Submissions.SubmissionRecord(
+                "REPORT", draft.getCategory(), reference,
+                Submissions.SubmissionStatus.PENDING, now, null,
+                draft.getCategory(), draft.getLocation(), draft.getDetails(), photoPath);
+        saveSubmission(record);
+        return record;
+    }
+
+    static synchronized List<Submissions.SubmissionRecord> getCurrentSubmissions(String type)
+            throws IOException {
+        Properties data = loadSubmissions();
+        List<Submissions.SubmissionRecord> list = new ArrayList<>();
+        for (String key : data.stringPropertyNames()) {
+            if (key.endsWith(".kind") && type.equals(data.getProperty(key))) {
+                String ref = key.substring(0, key.lastIndexOf('.'));
+                String kind = data.getProperty(ref + ".kind");
+                String title = data.getProperty(ref + ".title");
+                String reference = data.getProperty(ref + ".reference");
+                String statusStr = data.getProperty(ref + ".status");
+                String submittedAtStr = data.getProperty(ref + ".submittedAt");
+                String submittedBy = data.getProperty(ref + ".submittedBy");
+                String category = data.getProperty(ref + ".category");
+                String location = data.getProperty(ref + ".location");
+                String details = data.getProperty(ref + ".details");
+                String photoPath = data.getProperty(ref + ".photoPath");
+
+                Submissions.SubmissionStatus status;
+                switch (statusStr) {
+                    case "PENDING" -> status = Submissions.SubmissionStatus.PENDING;
+                    case "IN_PROGRESS" -> status = Submissions.SubmissionStatus.IN_PROGRESS;
+                    case "COMPLETED" -> status = Submissions.SubmissionStatus.COMPLETED;
+                    case "REJECTED" -> status = Submissions.SubmissionStatus.REJECTED;
+                    default -> status = Submissions.SubmissionStatus.PENDING;
+                }
+
+                LocalDateTime submittedAt = LocalDateTime.parse(submittedAtStr);
+
+                list.add(new Submissions.SubmissionRecord(
+                        kind, title, reference, status, submittedAt,
+                        submittedBy, category, location, details, photoPath));
+            }
+        }
+        return list;
+    }
+
+    private static Properties loadSubmissions() throws IOException {
+        Properties data = new Properties();
+        if (!Files.exists(SUBMISSIONS_STORE)) return data;
+        try (InputStream input = Files.newInputStream(SUBMISSIONS_STORE)) {
+            data.load(input);
+        }
+        return data;
+    }
+
+    private static void saveSubmission(Submissions.SubmissionRecord record) throws IOException {
+        Properties data = loadSubmissions();
+        String prefix = "submission." + record.reference + ".";
+        data.setProperty(prefix + "kind", record.kind);
+        data.setProperty(prefix + "title", record.title);
+        data.setProperty(prefix + "reference", record.reference);
+        data.setProperty(prefix + "status", record.status.name());
+        data.setProperty(prefix + "submittedAt", record.submittedAt.toString());
+        data.setProperty(prefix + "submittedBy", record.submittedBy == null ? "" : record.submittedBy);
+        data.setProperty(prefix + "category", record.category == null ? "" : record.category);
+        data.setProperty(prefix + "location", record.location == null ? "" : record.location);
+        data.setProperty(prefix + "details", record.details == null ? "" : record.details);
+        data.setProperty(prefix + "photoPath", record.photoPath == null ? "" : record.photoPath);
+        saveSubmissions(data);
+    }
+
+    private static void saveSubmissions(Properties data) throws IOException {
+        Path directory = SUBMISSIONS_STORE.getParent();
+        Files.createDirectories(directory);
+        Path temporaryFile = Files.createTempFile(directory, "submissions-", ".tmp");
+        try {
+            try (OutputStream output = Files.newOutputStream(temporaryFile)) {
+                data.store(output, "Barangay Central Signal submissions");
+            }
+            try {
+                Files.move(temporaryFile, SUBMISSIONS_STORE, StandardCopyOption.ATOMIC_MOVE,
+                        StandardCopyOption.REPLACE_EXISTING);
+            } catch (AtomicMoveNotSupportedException e) {
+                Files.move(temporaryFile, SUBMISSIONS_STORE, StandardCopyOption.REPLACE_EXISTING);
+            }
+        } finally {
+            Files.deleteIfExists(temporaryFile);
         }
     }
 }
