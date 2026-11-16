@@ -23,9 +23,8 @@ class ReportsScreen extends ScrollableScreen {
 
 class ReportsContent extends AppSection implements Scrollable {
     private final List<ConcernCategory> categories = ReportsData.getCategories();
-    private final List<ActiveReport> reports = new ArrayList<>(ReportsData.getActiveReports());
+    private final List<ActiveReport> reports = new ArrayList<>();
     private final JPanel reportList = new JPanel();
-    private int nextNumber = 895;   // next reference number (0894 is the sample report)
 
     @Override
     protected void buildUI() {
@@ -64,6 +63,7 @@ class ReportsContent extends AppSection implements Scrollable {
         add(Box.createVerticalStrut(10));
         reportList.setOpaque(false);
         reportList.setLayout(new BoxLayout(reportList, BoxLayout.Y_AXIS));
+        loadSavedReports();
         refreshReports();
         addFlexibleHeight(reportList);
 
@@ -102,29 +102,64 @@ class ReportsContent extends AppSection implements Scrollable {
         ReportDraft draft = new ReportFormDialog(names, preselectedCategory).show(this);
         if (draft == null) return;                       // cancelled
 
-        IconType icon = IconType.WARNING;
-        for (ConcernCategory c : categories) {
-            if (c.getName().equals(draft.getCategory())) icon = c.getIcon();
+        try {
+            SubmissionRecord submission = AccountsStore.addReportSubmission(draft);
+            IconType icon = IconType.WARNING;
+            for (ConcernCategory c : categories) {
+                if (c.getName().equals(draft.getCategory())) icon = c.getIcon();
+            }
+            reports.add(0, new ActiveReport(submission.title, submission.reference,
+                    ReportStatus.PENDING, icon, draft));
+            refreshReports();
+            JOptionPane.showMessageDialog(this,
+                    "Report submitted!\n\n" + submission.reference + "\nCategory: " + draft.getCategory()
+                            + "\nLocation: " + draft.getLocation()
+                            + "\nPhoto: " + (draft.getPhoto() == null ? "none" : draft.getPhoto().getName()),
+                    "Submit a New Report", JOptionPane.INFORMATION_MESSAGE);
+        } catch (java.io.IOException ex) {
+            JOptionPane.showMessageDialog(this, "Could not save your report:\n" + ex.getMessage(),
+                    "Report submission error", JOptionPane.ERROR_MESSAGE);
         }
-        String ref = String.format("Ref: #BCS-2026-%04d", nextNumber++);
-        reports.add(0, new ActiveReport(draft.getCategory() + " - " + draft.getLocation(),
-                ref, ReportStatus.PENDING, icon, draft));
-        refreshReports();
+    }
 
-        JOptionPane.showMessageDialog(this,
-                "Report submitted!\n\n" + ref + "\nCategory: " + draft.getCategory()
-                        + "\nLocation: " + draft.getLocation()
-                        + "\nPhoto: " + (draft.getPhoto() == null ? "none" : draft.getPhoto().getName()),
-                "Submit a New Report", JOptionPane.INFORMATION_MESSAGE);
+    private void loadSavedReports() {
+        try {
+            for (SubmissionRecord submission : AccountsStore.getCurrentSubmissions("REPORT")) {
+                IconType icon = IconType.WARNING;
+                for (ConcernCategory category : categories) {
+                    if (category.getName().equals(submission.category)) {
+                        icon = category.getIcon();
+                        break;
+                    }
+                }
+                File photo = submission.photoPath.isEmpty() ? null : new File(submission.photoPath);
+                ReportDraft draft = new ReportDraft(submission.category, submission.location,
+                        submission.details, photo);
+                reports.add(new ActiveReport(submission.title, submission.reference,
+                        ReportStatus.PENDING, icon, draft));
+            }
+        } catch (java.io.IOException ex) {
+            JOptionPane.showMessageDialog(this, "Could not load your saved reports:\n" + ex.getMessage(),
+                    "Reports error", JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     private void refreshReports() {
         reportList.removeAll();
-        for (ActiveReport r : reports) {
-            ReportCard card = new ReportCard(r);
-            card.setAlignmentX(LEFT_ALIGNMENT);
-            reportList.add(card);
-            reportList.add(Box.createVerticalStrut(8));
+        if (reports.isEmpty()) {
+            JLabel empty = new JLabel("No active reports yet.");
+            empty.setFont(Theme.regular(11));
+            empty.setForeground(Theme.MUTED);
+            empty.setBorder(new EmptyBorder(10, 4, 0, 0));
+            empty.setAlignmentX(LEFT_ALIGNMENT);
+            reportList.add(empty);
+        } else {
+            for (ActiveReport r : reports) {
+                ReportCard card = new ReportCard(r);
+                card.setAlignmentX(LEFT_ALIGNMENT);
+                reportList.add(card);
+                reportList.add(Box.createVerticalStrut(8));
+            }
         }
         reportList.revalidate();
         reportList.repaint();
@@ -535,9 +570,4 @@ class ReportsData {
         return list;
     }
 
-    static List<ActiveReport> getActiveReports() {
-        List<ActiveReport> list = new ArrayList<>();
-        list.add(new ActiveReport("Uncollected Garbage - Zone 2", "Ref: #BCS-2026-0894", ReportStatus.PENDING, IconType.TRASH, null));
-        return list;
-    }
 }
