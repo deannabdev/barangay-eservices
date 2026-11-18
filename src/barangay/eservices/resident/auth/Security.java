@@ -1,7 +1,12 @@
-package barangay.eservices;
+package auth;
+import data.AccountsStore;
+import profile.ProfileScreen;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Arrays;
 
 public class Security extends JFrame {
 
@@ -64,8 +69,8 @@ public class Security extends JFrame {
         forgot.setBounds(X0, 270, FW, 14);
         forgot.addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) {
-                // TODO: open your "forgot password" flow.
-                JOptionPane.showMessageDialog(Security.this, "Forgot password - coming soon.");
+                new LoginScreen.ForgotPasswordScreen().setVisible(true);
+                dispose();
             }
         });
         root.add(forgot);
@@ -84,9 +89,8 @@ public class Security extends JFrame {
 
         JLabel deleteText = new JLabel(
                 "<html><div style='width:" + FW + "px'><b>Deleting your account is permanent.</b> "
-                + "When you delete your account, your main profile and everything else you've added "
-                + "will be permanently deleted. You won't be able to retrieve any information from "
-                + "this account.</div></html>");
+                + "Your profile and ID photo will be deleted. Previously submitted requests and "
+                + "reports will remain in the system.</div></html>");
         deleteText.setFont(SecurityTheme.font(Font.PLAIN, 9.5f));
         deleteText.setForeground(Color.BLACK);
         deleteText.setVerticalAlignment(SwingConstants.TOP);
@@ -122,38 +126,66 @@ public class Security extends JFrame {
     }
 
     private void onChangePassword() {
-        String current = new String(currentPassword.getPassword());
-        String next    = new String(newPassword.getPassword());
-        String retype  = new String(retypePassword.getPassword());
+        char[] current = currentPassword.getPassword();
+        char[] next = newPassword.getPassword();
+        char[] retype = retypePassword.getPassword();
+        try {
+            String problem = null;
+            if (current.length == 0) problem = "Please enter your current password.";
+            else if (next.length < 8) problem = "Your new password must be at least 8 characters.";
+            else if (Arrays.equals(next, current)) {
+                problem = "Your new password must be different from the current one.";
+            } else if (!Arrays.equals(next, retype)) {
+                problem = "The new passwords do not match.";
+            }
 
-        String problem = null;
-        if (current.isEmpty())              problem = "Please enter your current password.";
-        else if (next.length() < 8)         problem = "Your new password must be at least 8 characters.";
-        else if (next.equals(current))      problem = "Your new password must be different from the current one.";
-        else if (!next.equals(retype))      problem = "The new passwords do not match.";
+            if (problem != null) {
+                JOptionPane.showMessageDialog(this, problem, "Change password", JOptionPane.WARNING_MESSAGE);
+                return;
+            }
 
-        if (problem != null) {
-            JOptionPane.showMessageDialog(this, problem, "Change password", JOptionPane.WARNING_MESSAGE);
-            return;
+            try {
+                if (!AccountsStore.changeCurrentPassword(current, next)) {
+                    JOptionPane.showMessageDialog(this, "Your current password is incorrect.",
+                            "Change password", JOptionPane.WARNING_MESSAGE);
+                    return;
+                }
+                JOptionPane.showMessageDialog(this, "Your password has been changed.");
+                currentPassword.setText("");
+                newPassword.setText("");
+                retypePassword.setText("");
+                goBack();
+            } catch (IOException | GeneralSecurityException ex) {
+                JOptionPane.showMessageDialog(this, "Could not change your password:\n" + ex.getMessage(),
+                        "Change password error", JOptionPane.ERROR_MESSAGE);
+            }
+        } finally {
+            Arrays.fill(current, '\0');
+            Arrays.fill(next, '\0');
+            Arrays.fill(retype, '\0');
         }
-
-        // TODO: check the current password and save the new one (database / API) here.
-        JOptionPane.showMessageDialog(this, "Your password has been changed.");
-        goBack();
     }
 
     private void onDeleteAccount() {
         Object[] options = {"Delete", "Cancel"};
         int answer = JOptionPane.showOptionDialog(this,
-                "Your account and everything you've added will be permanently deleted.\n"
-                + "This cannot be undone.",
+                "Your account, profile, and ID photo will be permanently deleted. "
+                + "Previously submitted requests and reports will remain.\nThis cannot be undone.",
                 "Delete account?", JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE,
                 null, options, options[1]);
         if (answer == 0) {
-            // TODO: delete the account (database / API) here.
-            JOptionPane.showMessageDialog(this, "Your account has been deleted.");
-            new LoginScreen().setVisible(true);
-            dispose();
+            try {
+                AccountsStore.deleteCurrentAccount();
+                JOptionPane.showMessageDialog(this,
+                        "Your account, profile, and ID photo have been deleted. Previously submitted requests "
+                                + "and reports remain in the system.",
+                        "Account deleted", JOptionPane.INFORMATION_MESSAGE);
+                new LoginScreen().setVisible(true);
+                dispose();
+            } catch (IOException ex) {
+                JOptionPane.showMessageDialog(this, "Could not delete your account:\n" + ex.getMessage(),
+                        "Delete account error", JOptionPane.ERROR_MESSAGE);
+            }
         }
     }
 
