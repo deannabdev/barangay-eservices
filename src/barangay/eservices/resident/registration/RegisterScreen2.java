@@ -1,7 +1,8 @@
-package barangay.eservices;
+package registration;
+import data.AccountsStore.RegistrationData;
+import components.PlaceholderField;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 
 public class RegisterScreen2 extends JFrame {
 
