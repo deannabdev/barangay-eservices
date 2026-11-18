@@ -1,4 +1,4 @@
-package barangay.eservices;
+package profile;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import java.awt.*;
@@ -419,9 +419,9 @@ class ProfileMenuRow extends JComponent {
 /** One active request with its reference number and status. */
 class ProfileRequestCard extends JComponent {
     private final String title, ref;
-    private final Submissions.SubmissionStatus status;
+    private final String status;
 
-    ProfileRequestCard(String title, String ref, Submissions.SubmissionStatus status) {
+    ProfileRequestCard(String title, String ref, String status) {
         this.title = title;
         this.ref = ref;
         this.status = status;
@@ -444,9 +444,14 @@ class ProfileRequestCard extends JComponent {
         g.draw(new Line2D.Double(18, cy + 1, 24, cy + 1));
         g.draw(new Line2D.Double(18, cy + 5, 24, cy + 5));
 
-        String statusLabel = status == null ? "Pending" : status.getLabel();
+        String statusLabel = switch (status == null ? "PENDING" : status) {
+            case "IN_PROGRESS" -> "In Progress";
+            case "COMPLETED" -> "Completed";
+            case "REJECTED" -> "Rejected";
+            default -> "Pending";
+        };
         Color bg, fg;
-        switch (status == null ? "PENDING" : status.name()) {
+        switch (status == null ? "PENDING" : status) {
             case "COMPLETED": bg = new Color(214, 240, 222); fg = new Color(30, 110, 55); break;
             case "REJECTED": bg = new Color(250, 218, 218); fg = new Color(180, 30, 30); break;
             default: bg = new Color(255, 236, 179); fg = new Color(230, 140, 0); break;
