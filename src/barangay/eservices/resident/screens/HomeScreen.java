@@ -1,8 +1,15 @@
-package barangay.eservices;
+package screens;
+import profile.ProfileScreen;
+import profile.ProfileScreen.NavigationBar;
+import components.CoreUi.HomeComponents;
+import components.CoreUi.AppSection;
+import components.CoreUi.NavListener;
+import components.CoreUi.Navigator;
+import components.CoreUi.ScrollableScreen;
 import javax.swing.*;
 import java.awt.*;
 
-class HomeScreen extends ScrollableScreen {
+public class HomeScreen extends ScrollableScreen {
     private final NavListener nav;
     HomeScreen(NavListener nav) { this.nav = nav; }
 
@@ -12,6 +19,14 @@ class HomeScreen extends ScrollableScreen {
         return new HomeComponents.HeaderBar("Barangay Central Signal Hub", "Central Signal, Taguig");
     }
     @Override protected AppSection createContent() { return new HomeContent(nav); }
+
+    public static JFrame createWindow() {
+        return new HomeWindow();
+    }
+
+    public static JFrame createWindow(String initialScreen) {
+        return new HomeWindow(initialScreen);
+    }
 }
 
 class HomeContent extends AppSection implements Scrollable {
@@ -102,10 +117,10 @@ class HomeWindow extends JFrame {
         screens.add(new EmergencyScreen(navigator).init(), "Emergency");
         screens.add(new GuideScreen().init(), "Guide");
         screens.add(new DirectoryScreen(navigator).init(), "Directory");
-        screens.add(new ProfileScreen(navigator), "Profile");
+        screens.add(new ProfileScreen(navigator::onNavigate), "Profile");
 
         String[] screenNames = {"Home", "E-Services", "Reports", "Guide", "Profile"};
-        ProfileNavBar bottomNav = new ProfileNavBar(0, index -> {
+        NavigationBar bottomNav = new NavigationBar(0, index -> {
             navigator.onNavigate(screenNames[index]);
         });
 
