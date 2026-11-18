@@ -1,8 +1,19 @@
-package barangay.eservices;
+package screens;
+import data.AccountsStore;
+import data.RequestsAndReports;
+import components.Theme;
+import components.CoreUi.HomeComponents;
+import components.CoreUi.AppSection;
+import components.CoreUi.Badge;
+import components.CoreUi.Divider;
+import components.CoreUi.IconLabel;
+import components.CoreUi.RoundedButton;
+import components.CoreUi.RoundedPanel;
+import components.CoreUi.ScrollableScreen;
+import components.IconType;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.geom.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,6 +40,25 @@ class PaidFee implements Fee {
 class FreeFee implements Fee {
     @Override public String getDescription() { return "Free"; }
     @Override public boolean isFree() { return true; }
+}
+
+class DocumentRequest {
+    private final String title;
+    private final String requirements;
+    private final String processing;
+    private final Fee fee;
+
+    DocumentRequest(String title, String requirements, String processing, Fee fee) {
+        this.title = title;
+        this.requirements = requirements;
+        this.processing = processing;
+        this.fee = fee;
+    }
+
+    String getTitle() { return title; }
+    String getRequirements() { return requirements; }
+    String getProcessing() { return processing; }
+    Fee getFee() { return fee; }
 }
 
 class EServicesScreen extends ScrollableScreen {
@@ -174,9 +204,9 @@ class DocumentRequestDialog {
                 continue;                                              // show the form again
             }
 
-            Submissions.SubmissionRecord submission;
+            RequestsAndReports.SubmissionRecord submission;
             try {
-                submission = AccountsStore.addDocumentSubmission(request, name, contact);
+                submission = AccountsStore.addDocumentSubmission(request.getTitle(), name, contact);
             } catch (java.io.IOException ex) {
                 JOptionPane.showMessageDialog(parent, "Could not save your document request:\n" + ex.getMessage(),
                         "Document request error", JOptionPane.ERROR_MESSAGE);
