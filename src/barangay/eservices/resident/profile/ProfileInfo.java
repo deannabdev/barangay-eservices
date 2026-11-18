@@ -1,4 +1,7 @@
-package barangay.eservices;
+package profile;
+import data.AccountsStore;
+import data.AccountsStore.AccountProfile;
+import data.AccountsStore.RegistrationData;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
