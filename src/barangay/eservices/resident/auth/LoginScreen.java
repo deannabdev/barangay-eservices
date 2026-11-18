@@ -1,4 +1,8 @@
-package barangay.eservices;
+package auth;
+import components.PlaceholderField;
+import registration.RegisterScreen1;
+import data.AccountsStore;
+import screens.HomeScreen;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
@@ -158,7 +162,7 @@ public class LoginScreen extends JFrame {
             protected void done() {
                 try {
                     if (get()) {
-                        HomeWindow home = new HomeWindow();
+                        JFrame home = HomeScreen.createWindow();
                         setLoginLoading(false);
                         dispose();
                         home.setVisible(true);
@@ -219,8 +223,9 @@ public class LoginScreen extends JFrame {
             title.setBounds(0, 122, W, 56);
             root.add(title);
 
-            ShadowLabel heading = new ShadowLabel("Forgot Password?", LoginTheme.RED);
+            JLabel heading = new JLabel("Forgot Password?");
             heading.setFont(LoginTheme.font(Font.BOLD, 26f));
+            heading.setForeground(LoginTheme.RED);
             heading.setBounds(18, 280, 320, 50);
             root.add(heading);
 
