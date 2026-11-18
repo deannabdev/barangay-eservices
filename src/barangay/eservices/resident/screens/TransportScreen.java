@@ -1,11 +1,14 @@
-package barangay.eservices;
+package screens;
+import components.Theme;
+import components.IconType;
+import components.CoreUi.HomeComponents;
+import components.CoreUi.AppSection;
+import components.CoreUi.NavListener;
+import components.CoreUi.ScrollableScreen;
+import components.CoreUi.TransportComponents;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.geom.*;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -292,4 +295,20 @@ class TransportData {
                 "Sincere community support vehicles for bereavement and funeral convoy assistance.", IconType.CIRCLE_X));
         return list;
     }
+}
+
+class TransportService {
+    private final String title;
+    private final String description;
+    private final IconType icon;
+
+    TransportService(String title, String description, IconType icon) {
+        this.title = title;
+        this.description = description;
+        this.icon = icon;
+    }
+
+    public String getTitle() { return title; }
+    public String getDescription() { return description; }
+    public IconType getIcon() { return icon; }
 }
