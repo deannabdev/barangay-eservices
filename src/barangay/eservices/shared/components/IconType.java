@@ -1,8 +1,7 @@
-package barangay.eservices;
-
+package components;
 import java.awt.*;
 
-enum IconType {
+public enum IconType {
     DOCUMENT {
         @Override public void draw(Graphics2D g, int size, Color color) { drawVector(g, size, color, HomeComponents.VectorIcon.Type.DOCUMENT); }
     },
