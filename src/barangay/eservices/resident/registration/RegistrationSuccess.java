@@ -1,4 +1,5 @@
-package barangay.eservices;
+package registration;
+import auth.LoginScreen;
 import javax.swing.*;
 import java.awt.*;
 
