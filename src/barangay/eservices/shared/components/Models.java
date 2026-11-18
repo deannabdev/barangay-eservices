@@ -1,9 +1,88 @@
-package barangay.eservices;
-
+package components;
 import java.awt.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+
+public final class Models {
+    private Models() {}
+
+    public enum BusinessType {
+        FOOD("Food"), PHARMACY("Pharmacy"), RETAIL("Retail"), HARDWARE("Hardware");
+
+        private final String label;
+
+        BusinessType(String label) { this.label = label; }
+
+        public String getLabel() { return label; }
+    }
+
+    public static final class Business {
+        private final String name;
+        private final BusinessType type;
+        private final String category;
+        private final boolean open;
+        private final String address;
+        private final double rating;
+        private final double latitude;
+        private final double longitude;
+
+        public Business(String name, BusinessType type, String category, boolean open, String address, double rating,
+                        double latitude, double longitude) {
+            this.name = name;
+            this.type = type;
+            this.category = category;
+            this.open = open;
+            this.address = address;
+            this.rating = rating;
+            this.latitude = latitude;
+            this.longitude = longitude;
+        }
+
+        public String getName() { return name; }
+        public BusinessType getType() { return type; }
+        public String getCategory() { return category; }
+        public boolean isOpen() { return open; }
+        public String getAddress() { return address; }
+        public double getRating() { return rating; }
+        public double getLatitude() { return latitude; }
+        public double getLongitude() { return longitude; }
+
+        public boolean matches(String query, BusinessType filter) {
+            if (filter != null && filter != type) return false;
+            String q = query == null ? "" : query.trim().toLowerCase();
+            if (q.isEmpty()) return true;
+            return name.toLowerCase().contains(q) || category.toLowerCase().contains(q)
+                    || address.toLowerCase().contains(q) || type.getLabel().toLowerCase().contains(q);
+        }
+    }
+
+}
+
+interface Fee {
+    String getDescription();
+    boolean isFree();
+
+    default CoreUi.Badge createTag() {
+        Color background = isFree() ? Theme.GREEN_SOFT : Theme.RED_SOFT;
+        Color foreground = isFree() ? Theme.GREEN : Theme.RED;
+        return new CoreUi.Badge(getDescription(), background, foreground, 8);
+    }
+}
+
+class PaidFee implements Fee {
+    private final String description;
+
+    PaidFee(String description) { this.description = description; }
+
+    @Override public String getDescription() { return description; }
+    @Override public boolean isFree() { return false; }
+}
+
+class FreeFee implements Fee {
+    @Override public String getDescription() { return "Free"; }
+    @Override public boolean isFree() { return true; }
+}
 
 class DocumentRequest {
     private final String title;
@@ -35,56 +114,6 @@ class ConcernCategory {
 
     public String getName() { return name; }
     public IconType getIcon() { return icon; }
-}
-
-enum BusinessType {
-    FOOD("Food"), PHARMACY("Pharmacy"), RETAIL("Retail"), HARDWARE("Hardware");
-
-    private final String label;
-
-    BusinessType(String label) { this.label = label; }
-
-    public String getLabel() { return label; }
-}
-
-class Business {
-    private final String name;
-    private final BusinessType type;
-    private final String category;
-    private final boolean open;
-    private final String address;
-    private final double rating;
-    private final double latitude;
-    private final double longitude;
-
-    Business(String name, BusinessType type, String category, boolean open, String address, double rating,
-             double latitude, double longitude) {
-        this.name = name;
-        this.type = type;
-        this.category = category;
-        this.open = open;
-        this.address = address;
-        this.rating = rating;
-        this.latitude = latitude;
-        this.longitude = longitude;
-    }
-
-    public String getName() { return name; }
-    public BusinessType getType() { return type; }
-    public String getCategory() { return category; }
-    public boolean isOpen() { return open; }
-    public String getAddress() { return address; }
-    public double getRating() { return rating; }
-    public double getLatitude() { return latitude; }
-    public double getLongitude() { return longitude; }
-
-    public boolean matches(String query, BusinessType filter) {
-        if (filter != null && filter != type) return false;
-        String q = query == null ? "" : query.trim().toLowerCase();
-        if (q.isEmpty()) return true;
-        return name.toLowerCase().contains(q) || category.toLowerCase().contains(q)
-                || address.toLowerCase().contains(q) || type.getLabel().toLowerCase().contains(q);
-    }
 }
 
 enum HotlineStyle {
@@ -276,23 +305,23 @@ class DataRepository {
         return list;
     }
 
-    static List<Business> getBusinesses() {
-        List<Business> list = new ArrayList<>();
-        list.add(new Business("Signal Central General Pharmacy", BusinessType.PHARMACY, "Pharmacy", true,
+    static List<Models.Business> getBusinesses() {
+        List<Models.Business> list = new ArrayList<>();
+        list.add(new Models.Business("Signal Central General Pharmacy", Models.BusinessType.PHARMACY, "Pharmacy", true,
                 "Ballecer St., Taguig City", 4.8, 14.5124, 121.0571));
-        list.add(new Business("Kabayan Puregold Mini Grocery", BusinessType.RETAIL, "Retail Store", true,
+        list.add(new Models.Business("Kabayan Puregold Mini Grocery", Models.BusinessType.RETAIL, "Retail Store", true,
                 "Purok 2, Taguig City", 4.3, 14.5109, 121.0582));
-        list.add(new Business("Ronald's Hardware & Construction Supply", BusinessType.HARDWARE, "Hardware Store", true,
+        list.add(new Models.Business("Ronald's Hardware & Construction Supply", Models.BusinessType.HARDWARE, "Hardware Store", true,
                 "M.L. Quezon St., Taguig City", 4.6, 14.5115, 121.0563));
-        list.add(new Business("Mang Larry's BBQ House", BusinessType.FOOD, "Food & Dining", true,
+        list.add(new Models.Business("Mang Larry's BBQ House", Models.BusinessType.FOOD, "Food & Dining", true,
                 "F. Manalo St., Taguig City", 4.2, 14.5131, 121.0578));
-        list.add(new Business("Sunrise Drugstore", BusinessType.PHARMACY, "Pharmacy", true,
+        list.add(new Models.Business("Sunrise Drugstore", Models.BusinessType.PHARMACY, "Pharmacy", true,
                 "Purok 3, Taguig City", 4.5, 14.5120, 121.0575));
-        list.add(new Business("Aling Maria's Sari-Sari Store", BusinessType.RETAIL, "Retail Store", true,
+        list.add(new Models.Business("Aling Maria's Sari-Sari Store", Models.BusinessType.RETAIL, "Retail Store", true,
                 "Purok 1, Taguig City", 4.0, 14.5112, 121.0568));
-        list.add(new Business("Joe's Kitchenette", BusinessType.FOOD, "Food & Dining", true,
+        list.add(new Models.Business("Joe's Kitchenette", Models.BusinessType.FOOD, "Food & Dining", true,
                 "M.L. Quezon St., Taguig City", 4.7, 14.5119, 121.0570));
-        list.add(new Business("ABC Hardware Supply", BusinessType.HARDWARE, "Hardware Store", true,
+        list.add(new Models.Business("ABC Hardware Supply", Models.BusinessType.HARDWARE, "Hardware Store", true,
                 "Ballecer St., Taguig City", 4.4, 14.5126, 121.0565));
         return list;
     }
