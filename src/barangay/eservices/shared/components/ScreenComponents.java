@@ -1,7 +1,5 @@
-package barangay.eservices;
-
+package components;
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.AttributeSet;
@@ -16,7 +14,7 @@ import java.awt.geom.*;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-final class HomeComponents {
+class HomeComponents {
     public static final Color PRIMARY = new Color(0xD32F2F);
     public static final Color PRIMARY_DARK = new Color(0xC62828);
     public static final Color PRIMARY_SOFT = new Color(0xFDECEC);
@@ -32,7 +30,7 @@ final class HomeComponents {
     public static final int H = 775;
     public static final int CONTENT_WIDTH = W - 48;
 
-    private HomeComponents() {}
+    HomeComponents() {}
 
     public static Font font(int style, int size) {
         return new Font("Segoe UI", style, size);
@@ -869,8 +867,8 @@ final class TransportComponents {
     }
 }
 
-final class DirectoryComponents {
-    private DirectoryComponents() {}
+class DirectoryComponents {
+    DirectoryComponents() {}
 
     public static final Color STAR_AMBER = new Color(0xF59E0B);
 
@@ -955,14 +953,10 @@ final class DirectoryComponents {
             setFont(HomeComponents.font(Font.PLAIN, 11));
             setCaretColor(HomeComponents.PRIMARY);
             setToolTipText(hint);
-            setDocument(new HintDocument(hint));
+            setDocument(new HintDocument());
         }
 
         private static class HintDocument extends PlainDocument {
-            private final String hint;
-
-            HintDocument(String hint) { this.hint = hint; }
-
             @Override public void insertString(int offs, String str, AttributeSet a) throws BadLocationException {
                 super.insertString(offs, str, a);
             }
@@ -1014,12 +1008,10 @@ final class DirectoryComponents {
         }
 
         private static class Chip extends JPanel {
-            final String label;
             private final JLabel text;
             private boolean selected;
 
             Chip(String label) {
-                this.label = label;
                 setOpaque(false);
                 setLayout(new BorderLayout());
                 setBorder(BorderFactory.createEmptyBorder(5, 8, 5, 8));
