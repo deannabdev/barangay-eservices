@@ -1,4 +1,7 @@
-package barangay.eservices;
+package registration;
+import data.AccountsStore.RegistrationData;
+import auth.LoginScreen;
+import components.PlaceholderField;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
