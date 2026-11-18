@@ -1,5 +1,4 @@
-package barangay.eservices;
-
+package components;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -201,84 +200,158 @@ class Badge extends RoundedPanel {
     }
 }
 
-interface NavListener {
-    void onNavigate(String screen);
-}
+public final class CoreUi {
+    private CoreUi() {}
 
-abstract class AppSection extends JPanel {
-    protected abstract void buildUI();
-
-    public final JPanel init() {
-        buildUI();
-        return this;
+    public interface NavListener {
+        void onNavigate(String screen);
     }
-}
 
-abstract class ScrollableScreen extends AppSection {
-    protected abstract String getHeaderTitle();
-    protected abstract AppSection createContent();
-    protected Runnable getBackAction() { return null; }
-    protected boolean hasHeader() { return true; }
-    protected JComponent getFixedHeader() { return null; }
-    protected Color getBackgroundColor() { return Theme.BG; }
+    public abstract static class AppSection extends JPanel {
+        protected abstract void buildUI();
 
-    @Override protected final void buildUI() {
-        setLayout(new BorderLayout());
-        setBackground(getBackgroundColor());
+        public final JPanel init() {
+            buildUI();
+            return this;
+        }
+    }
 
-        if (hasHeader()) {
-            JPanel header = new JPanel(new BorderLayout(10, 0));
-            header.setBackground(Color.WHITE);
-            header.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.BORDER),
-                    new EmptyBorder(8, 16, 10, 16)));
+    public abstract static class ScrollableScreen extends AppSection {
+        protected abstract String getHeaderTitle();
+        protected abstract AppSection createContent();
+        protected Runnable getBackAction() { return null; }
+        protected boolean hasHeader() { return true; }
+        protected JComponent getFixedHeader() { return null; }
+        protected Color getBackgroundColor() { return Theme.BG; }
 
-            JLabel title = new JLabel(getHeaderTitle());
-            title.setFont(Theme.bold(14));
-            title.setForeground(Theme.TEXT);
-            header.add(title, BorderLayout.CENTER);
+        @Override
+        protected final void buildUI() {
+            setLayout(new BorderLayout());
+            setBackground(getBackgroundColor());
 
-            Runnable backAction = getBackAction();
-            if (backAction != null) {
-                JButton backButton = new JButton("\u2039");
-                backButton.setFont(Theme.bold(24));
-                backButton.setForeground(Theme.TEXT);
-                backButton.setFocusPainted(false);
-                backButton.setContentAreaFilled(false);
-                backButton.setBorderPainted(false);
-                backButton.addActionListener(event -> backAction.run());
-                header.add(backButton, BorderLayout.WEST);
+            if (hasHeader()) {
+                JPanel header = new JPanel(new BorderLayout(10, 0));
+                header.setBackground(Color.WHITE);
+                header.setBorder(BorderFactory.createCompoundBorder(
+                        BorderFactory.createMatteBorder(0, 0, 1, 0, Theme.BORDER),
+                        new EmptyBorder(8, 16, 10, 16)));
+
+                JLabel title = new JLabel(getHeaderTitle());
+                title.setFont(Theme.bold(14));
+                title.setForeground(Theme.TEXT);
+                header.add(title, BorderLayout.CENTER);
+
+                Runnable backAction = getBackAction();
+                if (backAction != null) {
+                    JButton backButton = new JButton("\u2039");
+                    backButton.setFont(Theme.bold(24));
+                    backButton.setForeground(Theme.TEXT);
+                    backButton.setFocusPainted(false);
+                    backButton.setContentAreaFilled(false);
+                    backButton.setBorderPainted(false);
+                    backButton.addActionListener(event -> backAction.run());
+                    header.add(backButton, BorderLayout.WEST);
+                }
+                add(header, BorderLayout.NORTH);
             }
-            add(header, BorderLayout.NORTH);
+
+            JComponent fixedHeader = getFixedHeader();
+            if (fixedHeader != null) add(fixedHeader, BorderLayout.NORTH);
+
+            JScrollPane scroll = new JScrollPane(createContent().init());
+            scroll.setBorder(null);
+            scroll.getVerticalScrollBar().setUnitIncrement(16);
+            scroll.getViewport().setBackground(getBackgroundColor());
+            scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            add(scroll, BorderLayout.CENTER);
+        }
+    }
+
+    public static class Navigator implements NavListener {
+        private final CardLayout cards;
+        private final JPanel center;
+        private final List<NavListener> listeners = new ArrayList<>();
+
+        public Navigator(CardLayout cards, JPanel center) {
+            this.cards = cards;
+            this.center = center;
         }
 
-        JComponent fixedHeader = getFixedHeader();
-        if (fixedHeader != null) add(fixedHeader, BorderLayout.NORTH);
+        @Override
+        public void onNavigate(String screen) {
+            cards.show(center, screen);
+            for (NavListener listener : listeners) listener.onNavigate(screen);
+        }
 
-        JScrollPane scroll = new JScrollPane(createContent().init());
-        scroll.setBorder(null);
-        scroll.getVerticalScrollBar().setUnitIncrement(16);
-        scroll.getViewport().setBackground(getBackgroundColor());
-        scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-        add(scroll, BorderLayout.CENTER);
-    }
-}
-
-class Navigator implements NavListener {
-    private final CardLayout cards;
-    private final JPanel center;
-    private final List<NavListener> listeners = new ArrayList<>();
-
-    Navigator(CardLayout cards, JPanel center) {
-        this.cards = cards;
-        this.center = center;
+        public void attach(NavListener listener) { listeners.add(listener); }
+        public void detach(NavListener listener) { listeners.remove(listener); }
     }
 
-    public void onNavigate(String screen) {
-        cards.show(center, screen);
-        for (NavListener l : listeners) l.onNavigate(screen);
+    public static final class HomeComponents extends components.HomeComponents {
+        private HomeComponents() {}
     }
 
-    public void attach(NavListener l) { listeners.add(l); }
-    public void detach(NavListener l) { listeners.remove(l); }
+    public static final class DirectoryComponents extends components.DirectoryComponents {
+        private DirectoryComponents() {}
+    }
+
+    public static class Badge extends components.Badge {
+        public Badge(String text, Color background, Color foreground, int radius) {
+            super(text, background, foreground, radius);
+        }
+    }
+
+    public static class Divider extends components.Divider {
+        public Divider() {}
+    }
+
+    public static class IconLabel extends components.IconLabel {
+        public IconLabel(IconType type, int size, Color color) {
+            super(type, size, color);
+        }
+    }
+
+    public static class RoundedButton extends components.RoundedButton {
+        public RoundedButton(String text) {
+            super(text);
+        }
+
+        public RoundedButton(String text, Color background, Color foreground) {
+            super(text, background, foreground);
+        }
+    }
+
+    public static class RoundedPanel extends components.RoundedPanel {
+        public RoundedPanel(Color background, Color border, int radius) {
+            super(background, border, radius);
+        }
+    }
+
+    public static final class ReportsComponents {
+        private ReportsComponents() {}
+
+        public static class ReportIcon extends components.ReportsComponents.ReportIcon {
+            public enum Type { PLUS, STREETLIGHT_OFF, TRASH, TREE, GAVEL }
+
+            public ReportIcon(Type type, int size, Color color) {
+                super(components.ReportsComponents.ReportIcon.Type.valueOf(type.name()), size, color);
+            }
+        }
+    }
+
+    public static final class TransportComponents {
+        private TransportComponents() {}
+
+        public static class NoticeBanner extends components.TransportComponents.NoticeBanner {
+            public NoticeBanner(String lead, String message) {
+                super(lead, message);
+            }
+        }
+
+        public static class ServiceCard extends components.TransportComponents.ServiceCard {
+            public ServiceCard(Icon icon, String title, String description, String action, Runnable onClick) {
+                super(icon, title, description, action, onClick);
+            }
+        }
+    }
 }
