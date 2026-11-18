@@ -1,10 +1,22 @@
-package barangay.eservices;
+package screens;
+import data.AccountsStore;
+import data.RequestsAndReports;
+import components.Theme;
+import components.IconType;
+import components.CoreUi.HomeComponents;
+import components.CoreUi.AppSection;
+import components.CoreUi.Badge;
+import components.CoreUi.IconLabel;
+import components.CoreUi.ReportsComponents;
+import components.CoreUi.RoundedButton;
+import components.CoreUi.RoundedPanel;
+import components.CoreUi.ScrollableScreen;
+import components.PlaceholderField;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.*;
 import javax.imageio.ImageIO;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.image.BufferedImage;
@@ -103,7 +115,8 @@ class ReportsContent extends AppSection implements Scrollable {
         if (draft == null) return;                       // cancelled
 
         try {
-            Submissions.SubmissionRecord submission = AccountsStore.addReportSubmission(draft);
+            RequestsAndReports.SubmissionRecord submission = AccountsStore.addReportSubmission(
+                    draft.getCategory(), draft.getLocation(), draft.getDetails(), draft.getPhoto());
             IconType icon = IconType.WARNING;
             for (ConcernCategory c : categories) {
                 if (c.getName().equals(draft.getCategory())) icon = c.getIcon();
@@ -124,7 +137,7 @@ class ReportsContent extends AppSection implements Scrollable {
 
     private void loadSavedReports() {
         try {
-            for (Submissions.SubmissionRecord submission : AccountsStore.getCurrentSubmissions("REPORT")) {
+            for (RequestsAndReports.SubmissionRecord submission : AccountsStore.getCurrentSubmissions("REPORT")) {
                 IconType icon = IconType.WARNING;
                 for (ConcernCategory category : categories) {
                     if (category.getName().equals(submission.category)) {
@@ -286,7 +299,7 @@ class ReportCard extends RoundedPanel {
         ReportStatus st = report.getStatus();
         add(Theme.wrap(new JLabel(ReportsScreenIcons.create(report.getIcon(), 15, Theme.RED))), BorderLayout.WEST);
         add(textWrap, BorderLayout.CENTER);
-        add(Theme.wrap(new Badge(st.getLabel(), st.getBg(), st.getFg(), null, 8)), BorderLayout.EAST);
+        add(Theme.wrap(new Badge(st.getLabel(), st.getBg(), st.getFg(), 8)), BorderLayout.EAST);
 
         addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) { ReportDetailsDialog.show(ReportCard.this, report); }
@@ -570,4 +583,78 @@ class ReportsData {
         return list;
     }
 
+}
+
+class ConcernCategory {
+    private final String name;
+    private final IconType icon;
+
+    ConcernCategory(String name, IconType icon) {
+        this.name = name;
+        this.icon = icon;
+    }
+
+    public String getName() { return name; }
+    public IconType getIcon() { return icon; }
+}
+
+enum ReportStatus {
+    PENDING("Pending", new Color(0xFE, 0xF3, 0xC7), new Color(0xD9, 0x77, 0x06)),
+    IN_PROGRESS("In Progress", new Color(0xDB, 0xEA, 0xFE), new Color(0x25, 0x63, 0xEB)),
+    RESOLVED("Resolved", new Color(0xDC, 0xFC, 0xE7), new Color(0x16, 0xA3, 0x4A));
+
+    private final String label;
+    private final Color background;
+    private final Color foreground;
+
+    ReportStatus(String label, Color background, Color foreground) {
+        this.label = label;
+        this.background = background;
+        this.foreground = foreground;
+    }
+
+    public String getLabel() { return label; }
+    public Color getBg() { return background; }
+    public Color getFg() { return foreground; }
+}
+
+class ReportDraft {
+    private final String category;
+    private final String location;
+    private final String details;
+    private final File photo;
+
+    ReportDraft(String category, String location, String details, File photo) {
+        this.category = category;
+        this.location = location;
+        this.details = details;
+        this.photo = photo;
+    }
+
+    public String getCategory() { return category; }
+    public String getLocation() { return location; }
+    public String getDetails() { return details; }
+    public File getPhoto() { return photo; }
+}
+
+class ActiveReport {
+    private final String title;
+    private final String reference;
+    private final ReportStatus status;
+    private final IconType icon;
+    private final ReportDraft draft;
+
+    ActiveReport(String title, String reference, ReportStatus status, IconType icon, ReportDraft draft) {
+        this.title = title;
+        this.reference = reference;
+        this.status = status;
+        this.icon = icon;
+        this.draft = draft;
+    }
+
+    public String getTitle() { return title; }
+    public String getReference() { return reference; }
+    public ReportStatus getStatus() { return status; }
+    public IconType getIcon() { return icon; }
+    public ReportDraft getDraft() { return draft; }
 }
