@@ -1,24 +1,24 @@
-package barangay.eservices;
+package components;
 
 import javax.swing.*;
 import java.awt.*;
 
-class PlaceholderField extends JTextField {
+public class PlaceholderField extends JTextField {
     private final String hint;
     private final Color hintColor;
     private final Font hintFont;
 
-    PlaceholderField(String hint) {
+    public PlaceholderField(String hint) {
         this(hint, Theme.regular(11), Theme.TEXT, new Color(0x9C, 0xA3, 0xAF), null,
                 Theme.regular(11));
     }
 
-    PlaceholderField(String hint, Font font, Color foreground, Color hintColor, Color caretColor) {
+    public PlaceholderField(String hint, Font font, Color foreground, Color hintColor, Color caretColor) {
         this(hint, font, foreground, hintColor, caretColor, font);
     }
 
-    PlaceholderField(String hint, Font font, Color foreground, Color hintColor, Color caretColor,
-                     Font hintFont) {
+    public PlaceholderField(String hint, Font font, Color foreground, Color hintColor, Color caretColor,
+                            Font hintFont) {
         this.hint = hint;
         this.hintColor = hintColor;
         this.hintFont = hintFont;
