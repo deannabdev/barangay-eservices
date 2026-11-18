@@ -1,10 +1,14 @@
-package barangay.eservices;
+package screens;
+import components.CoreUi.AppSection;
+import components.CoreUi.HomeComponents;
+import components.CoreUi.NavListener;
+import components.CoreUi.ScrollableScreen;
+import components.Theme;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,7 +50,19 @@ class EmergencyContent extends AppSection {
         desc.setFont(Theme.regular(12));
         desc.setForeground(new Color(0xF3, 0xCB, 0xCB));
 
-        content.add(new BackButton(40, () -> nav.onNavigate("Home")));   // back to Home
+        JButton back = new JButton("\u2039");
+        Dimension backSize = new Dimension(40, 40);
+        back.setPreferredSize(backSize);
+        back.setMinimumSize(backSize);
+        back.setMaximumSize(backSize);
+        back.setFont(Theme.bold(32));
+        back.setForeground(Color.WHITE);
+        back.setFocusPainted(false);
+        back.setContentAreaFilled(false);
+        back.setBorderPainted(false);
+        back.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        back.addActionListener(event -> nav.onNavigate("Home"));
+        content.add(back);
         content.add(Box.createVerticalStrut(16));
         content.add(heading);
         content.add(Box.createVerticalStrut(8));
@@ -63,21 +79,22 @@ class EmergencyContent extends AppSection {
     }
 }
 
-class HotlineRow extends RoundedPanel {
+class HotlineRow extends HomeComponents.RoundedPanel {
     private final Hotline hotline;
 
     HotlineRow(Hotline hotline) {
-        super(hotline.getStyle().getCardBg(), null, 16);     // style decides how each row looks
+        super(16, hotline.getStyle().getCardBg(), null);
         this.hotline = hotline;
         HotlineStyle st = hotline.getStyle();
         setLayout(new BorderLayout(12, 0));
         setBorder(new EmptyBorder(14, 12, 14, 12));
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
-        RoundedPanel circle = new RoundedPanel(st.getIconBg(), null, 36);
+        HomeComponents.RoundedPanel circle = new HomeComponents.RoundedPanel(36, st.getIconBg(), null);
         circle.setLayout(new GridBagLayout());
         circle.setPreferredSize(new Dimension(36, 36));
-        circle.add(new IconLabel(IconType.PHONE, 16, st.getIconFg()));
+        circle.add(new JLabel(new HomeComponents.VectorIcon(
+                HomeComponents.VectorIcon.Type.PHONE, 16, st.getIconFg())));
 
         JLabel name = new JLabel("<html><body width='165'>" + hotline.getName() + "</body></html>");
         name.setFont(Theme.bold(12));
@@ -124,9 +141,9 @@ class HotlineRow extends RoundedPanel {
     }
 }
 
-class CallPill extends RoundedPanel {
+class CallPill extends HomeComponents.RoundedPanel {
     CallPill(Color bg, Color fg, Runnable onClick) {
-        super(bg, null, 16);
+        super(16, bg, null);
         setLayout(new GridBagLayout());
         setPreferredSize(new Dimension(46, 22));
         setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
@@ -140,6 +157,54 @@ class CallPill extends RoundedPanel {
     }
 
     @Override public Dimension getMaximumSize() { return getPreferredSize(); }
+}
+
+enum HotlineStyle {
+    FEATURED(new Color(0, 0, 0, 0), Color.WHITE, new Color(0xF3, 0xB8, 0xB8), Color.WHITE,
+            new Color(0xA3, 0x2B, 0x2B), new Color(0xFF, 0xE4, 0xE4), Color.WHITE, Theme.RED),
+    STANDARD(Color.WHITE, Theme.TEXT, Theme.TEXT_SUB, Theme.RED, Theme.RED_SOFT, Theme.RED, Theme.RED, Color.WHITE);
+
+    private final Color cardBg, title, subtitle, tagline, iconBg, iconFg, callBg, callFg;
+
+    HotlineStyle(Color cardBg, Color title, Color subtitle, Color tagline,
+                 Color iconBg, Color iconFg, Color callBg, Color callFg) {
+        this.cardBg = cardBg;
+        this.title = title;
+        this.subtitle = subtitle;
+        this.tagline = tagline;
+        this.iconBg = iconBg;
+        this.iconFg = iconFg;
+        this.callBg = callBg;
+        this.callFg = callFg;
+    }
+
+    public Color getCardBg() { return cardBg; }
+    public Color getTitle() { return title; }
+    public Color getSubtitle() { return subtitle; }
+    public Color getTagline() { return tagline; }
+    public Color getIconBg() { return iconBg; }
+    public Color getIconFg() { return iconFg; }
+    public Color getCallBg() { return callBg; }
+    public Color getCallFg() { return callFg; }
+}
+
+class Hotline {
+    private final String name;
+    private final String agency;
+    private final String tagline;
+    private final HotlineStyle style;
+
+    Hotline(String name, String agency, String tagline, HotlineStyle style) {
+        this.name = name;
+        this.agency = agency;
+        this.tagline = tagline;
+        this.style = style;
+    }
+
+    public String getName() { return name; }
+    public String getAgency() { return agency; }
+    public String getTagline() { return tagline; }
+    public HotlineStyle getStyle() { return style; }
 }
 
 /** Sample data for this screen. */
