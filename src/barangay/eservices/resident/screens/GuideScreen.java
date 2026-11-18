@@ -1,4 +1,12 @@
-package barangay.eservices;
+package screens;
+import components.Theme;
+import components.IconType;
+import components.CoreUi.HomeComponents;
+import components.CoreUi.AppSection;
+import components.CoreUi.IconLabel;
+import components.CoreUi.RoundedButton;
+import components.CoreUi.RoundedPanel;
+import components.CoreUi.ScrollableScreen;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -485,6 +493,19 @@ final class MapDialog {
 }
 
 /** Sample data for this screen. */
+class Official {
+    private final String name;
+    private final String position;
+
+    Official(String name, String position) {
+        this.name = name;
+        this.position = position;
+    }
+
+    public String getName() { return name; }
+    public String getPosition() { return position; }
+}
+
 class GuideData {
     static List<Official> getOfficials() {
         List<Official> list = new ArrayList<>();
