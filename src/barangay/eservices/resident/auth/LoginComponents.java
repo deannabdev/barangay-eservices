@@ -1,11 +1,9 @@
-package barangay.eservices;
+package auth;
+import components.Theme;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.*;
-import java.awt.image.BufferedImage;
-import java.awt.image.ConvolveOp;
-import java.awt.image.Kernel;
 import java.util.Arrays;
 
 final class LoginTheme {
