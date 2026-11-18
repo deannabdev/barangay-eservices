@@ -1,4 +1,4 @@
-package barangay.eservices;
+package auth;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
