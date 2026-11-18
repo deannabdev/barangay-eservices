@@ -1,8 +1,9 @@
-package barangay.eservices;
+package registration;
+import data.AccountsStore;
+import data.AccountsStore.RegistrationData;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
