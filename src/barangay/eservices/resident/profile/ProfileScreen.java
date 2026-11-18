@@ -1,10 +1,19 @@
-package barangay.eservices;
+package profile;
+import auth.LoginScreen;
+import auth.Security;
+import data.AccountsStore;
+import data.AccountsStore.AccountProfile;
+import data.RequestsAndReports;
+import screens.HomeScreen;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class ProfileScreen extends ProfileScreenBackgroundPanel {
 
@@ -15,22 +24,36 @@ public class ProfileScreen extends ProfileScreenBackgroundPanel {
     private final JLabel nameLabel    = new JLabel("Your Name", SwingConstants.CENTER);
     private final JLabel contactLabel = new JLabel("", SwingConstants.CENTER);
     private final JPanel activeItems = new JPanel();
-    private final Navigator navigator;
+    private final Consumer<String> navigate;
 
     public ProfileScreen() {
         this(null);
     }
 
-    ProfileScreen(Navigator navigator) {
-        this.navigator = navigator;
+    public ProfileScreen(Consumer<String> navigate) {
+        this.navigate = navigate;
         setLayout(null);
-        setPreferredSize(new Dimension(W, navigator == null ? H : H - 86));
+        setPreferredSize(new Dimension(W, navigate == null ? H : H - 86));
         buildUI(this);
         loadCurrentUser();
-        if (navigator != null) {
-            navigator.attach(screen -> {
-                if ("Profile".equals(screen)) refreshActiveItems();
+        if (navigate != null) {
+            addComponentListener(new ComponentAdapter() {
+                @Override
+                public void componentShown(ComponentEvent event) {
+                    refreshActiveItems();
+                }
             });
+        }
+    }
+
+    public static class NavigationBar extends ProfileNavBar {
+        public NavigationBar(int active, java.util.function.IntConsumer onSelect) {
+            super(active, onSelect);
+        }
+
+        @Override
+        public void setActive(int active) {
+            super.setActive(active);
         }
     }
 
@@ -160,7 +183,7 @@ public class ProfileScreen extends ProfileScreenBackgroundPanel {
         root.add(activeItemsScroll);
 
         // Bottom navigation
-        if (navigator == null) {
+        if (navigate == null) {
             ProfileNavBar nav = new ProfileNavBar(4, this::navigate);
             nav.setBounds(0, 689, W, H - 689);
             root.add(nav);
@@ -170,7 +193,7 @@ public class ProfileScreen extends ProfileScreenBackgroundPanel {
     private void refreshActiveItems() {
         activeItems.removeAll();
         try {
-            List<Submissions.SubmissionRecord> records = new ArrayList<>();
+            List<RequestsAndReports.SubmissionRecord> records = new ArrayList<>();
             records.addAll(AccountsStore.getCurrentSubmissions("REPORT"));
             records.addAll(AccountsStore.getCurrentSubmissions("DOCUMENT"));
             records.sort((first, second) -> Long.compare(second.getSubmittedAt(), first.getSubmittedAt()));
@@ -182,10 +205,11 @@ public class ProfileScreen extends ProfileScreenBackgroundPanel {
                 empty.setBorder(new EmptyBorder(10, 4, 0, 0));
                 activeItems.add(empty);
             } else {
-                for (Submissions.SubmissionRecord record : records) {
+                for (RequestsAndReports.SubmissionRecord record : records) {
                     String type = "REPORT".equals(record.kind) ? "Report: " : "Request: ";
                     ProfileRequestCard card = new ProfileRequestCard(
-                            type + record.title, record.reference, record.status);
+                            type + record.title, record.reference,
+                            record.status == null ? null : record.status.name());
                     card.setPreferredSize(new Dimension(CW, 54));
                     card.setMinimumSize(new Dimension(CW, 54));
                     card.setMaximumSize(new Dimension(Integer.MAX_VALUE, 54));
@@ -210,11 +234,11 @@ public class ProfileScreen extends ProfileScreenBackgroundPanel {
     private void navigate(int index) {
         String[] names = {"Home", "E-Services", "Reports", "Guide", "Profile"};
         String screen = names[index];
-        if (navigator != null) {
-            navigator.onNavigate(screen);
+        if (navigate != null) {
+            navigate.accept(screen);
         } else if (index != 4) {
             closeWindow();
-            new HomeWindow(screen).setVisible(true);
+            HomeScreen.createWindow(screen).setVisible(true);
         }
     }
 
