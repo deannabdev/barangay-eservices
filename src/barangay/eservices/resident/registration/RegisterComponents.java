@@ -1,4 +1,6 @@
-package barangay.eservices;
+package registration;
+import components.PlaceholderField;
+import components.Theme;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxUI;
 import java.awt.*;
